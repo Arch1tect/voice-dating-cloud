@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 
-export const update = functions.https.onCall((data, context) => {
+export const callMe = functions.https.onCall((data, context) => {
 	const authUser = context.auth
 
 	if (!authUser) {
@@ -9,12 +9,13 @@ export const update = functions.https.onCall((data, context) => {
 		return
 	}
 	const { uid: selfUserId } = authUser
+	const { isCallMeEnabled } = data
 
 	const selfUserRef = admin.firestore().collection("users").doc(selfUserId)
 
-	// TODO: sanity user input
-
-	selfUserRef.update({ ...data, updatedAt: new Date() })
+	selfUserRef.update({
+		callMeEnabledTime: isCallMeEnabled ? new Date() : false,
+	})
 
 	return { success: true }
 })

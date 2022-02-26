@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 
-export const login = functions.https.onCall((data, context) => {
+export const checkIn = functions.https.onCall((data, context) => {
 	const authUser = context.auth
 
 	if (!authUser) {
