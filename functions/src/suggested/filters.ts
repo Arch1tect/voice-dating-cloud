@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin"
 import { WhereFilterOp } from "@google-cloud/firestore"
+import { convertAgeToBirthday } from "../utils"
 type Filters = {
 	gender?: string
 	minAge?: number
@@ -21,14 +22,6 @@ async function getFilters(selfUserId: string) {
 	const filtersSnapshot = await selfUserFiltersDocRef.get()
 	const res = filtersSnapshot.data()
 	return res as Filters
-}
-
-export const convertAgeToBirthday = (age: number) => {
-	const today = new Date()
-	today.setFullYear(today.getFullYear() - age)
-	const res = today.getTime()
-
-	return res
 }
 
 function where(a: string, b: string, c: any): [string, WhereFilterOp, any] {

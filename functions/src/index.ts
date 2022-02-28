@@ -5,6 +5,7 @@ import { checkIn } from "./user/checkIn"
 import { callMe } from "./user/callMe"
 import { updateFilters } from "./user/updateFilters"
 import { getSuggestedUsers } from "./suggested"
+import { getHotUsers } from "./hot"
 
 admin.initializeApp()
 
@@ -13,4 +14,5 @@ exports.editInfo = editInfo
 exports.checkIn = checkIn
 exports.callMe = callMe
 exports.updateFilters = updateFilters
-exports.getSuggested = getSuggestedUsers
+exports.getSuggestedUsers = getSuggestedUsers
+exports.getHotUsers = getHotUsers
