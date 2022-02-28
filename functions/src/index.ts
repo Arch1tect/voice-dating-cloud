@@ -6,6 +6,7 @@ import { callMe } from "./user/callMe"
 import { updateFilters } from "./user/updateFilters"
 import { getSuggestedUsers } from "./suggested"
 import { getHotUsers } from "./hot"
+import { sendMessage } from "./message"
 
 admin.initializeApp()
 
@@ -16,3 +17,4 @@ exports.callMe = callMe
 exports.updateFilters = updateFilters
 exports.getSuggestedUsers = getSuggestedUsers
 exports.getHotUsers = getHotUsers
+exports.sendMessage = sendMessage
