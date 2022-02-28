@@ -15,29 +15,28 @@ export const like = functions.https.onCall((data, context) => {
 		.firestore()
 		.collection("users")
 		.doc(targetUserId)
-	const selfUserContactDocRef = admin
+	const selfUserLikedDocRef = admin
 		.firestore()
 		.collection("users")
 		.doc(selfUserId)
-		.collection("contacts")
+		.collection("peopleILiked")
 		.doc(targetUserId)
-	const targetUserContactDocRef = admin
+	const targetUserLikedDocRef = admin
 		.firestore()
 		.collection("users")
 		.doc(targetUserId)
-		.collection("contacts")
+		.collection("peopleLikedMe")
 		.doc(selfUserId)
 
-	// IlikeYouTime and youLikeMeTime are also updated when dislike happen
-	// which is ok, we can deduce whether the time is like or dislike time
-	selfUserContactDocRef.set(
-		{ id: targetUserId, IlikeYou: like, IlikeYouTime: new Date() },
-		{ merge: true }
-	)
-	targetUserContactDocRef.set(
-		{ id: selfUserId, youLikeMe: like, youLikeMeTime: new Date() },
-		{ merge: true }
-	)
+	if (like) {
+		selfUserLikedDocRef.set({ id: targetUserId, createdAt: new Date() })
+
+		targetUserLikedDocRef.set({ id: selfUserId, createdAt: new Date() })
+	} else {
+		selfUserLikedDocRef.delete()
+		targetUserLikedDocRef.delete()
+	}
+
 	targetUserRef.update({
 		likeCount: admin.firestore.FieldValue.increment(like ? 1 : -1),
 	})
