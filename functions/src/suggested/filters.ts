@@ -11,7 +11,7 @@ type Filters = {
 	languages?: []
 }
 
-async function getFilters(selfUserId: string) {
+export const getFilters = async (selfUserId: string) => {
 	const selfUserFiltersDocRef = admin
 		.firestore()
 		.collection("users")
@@ -28,8 +28,7 @@ function where(a: string, b: string, c: any): [string, WhereFilterOp, any] {
 	return [a, b as WhereFilterOp, c]
 }
 
-export const getQueryConstraints = async (selfUserId: string) => {
-	const filters = await getFilters(selfUserId)
+export const getQueryConstraints = async (filters: Filters) => {
 	const { gender, minAge, maxAge, minHeight, maxHeight, languages } = filters
 
 	const constraints = []

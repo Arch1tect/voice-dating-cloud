@@ -3,18 +3,26 @@ import * as admin from "firebase-admin"
 
 import { getQueryConstraints } from "./filters"
 
+/*
+Client must always send together the filters, this is because client may update
+filters and call this function right away, and server may not pull the latest filters
+from firestore.
+*/
+
 export const getSuggestedUsers = functions.https.onCall(
-	async (data, context) => {
+	async (filters, context) => {
 		const authUser = context.auth
 
 		if (!authUser) {
 			console.error("401")
 			return
 		}
-		const { uid: selfUserId } = authUser
+		// const { uid: selfUserId } = authUser
+		// Client must always send the filters when calling
+		// const filters = data || (await getFilters(selfUserId))
 
 		// TODO: check if user is VIP for certain filters
-		const queryConstraints = await getQueryConstraints(selfUserId)
+		const queryConstraints = await getQueryConstraints(filters)
 
 		// TODO: get state from filter
 		let query = admin
