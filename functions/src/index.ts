@@ -7,6 +7,7 @@ import { updateFilters } from "./user/updateFilters"
 import { getSuggestedUsers } from "./suggested"
 import { getHotUsers } from "./hot"
 import { sendMessage } from "./message"
+import { uploadPhoto } from "./user/uploadPhoto"
 
 admin.initializeApp()
 
@@ -18,3 +19,4 @@ exports.updateFilters = updateFilters
 exports.getSuggestedUsers = getSuggestedUsers
 exports.getHotUsers = getHotUsers
 exports.sendMessage = sendMessage
+exports.uploadPhoto = uploadPhoto
