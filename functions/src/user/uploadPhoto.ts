@@ -35,7 +35,7 @@ export const uploadPhoto = functions.https.onCall(async (data, context) => {
 		const { value, name } = fileSizes[index]
 		const filePath = `users/${selfUserId}/profile/${timestamp}-${value}.jpg`
 
-		if (name === "small") {
+		if (name !== "large") {
 			// client will try to display small image size once this function returns
 			// therefore wait till finish uploading the small image
 			await resizeAndUpload(filePath, value, buffer)
