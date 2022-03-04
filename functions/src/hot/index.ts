@@ -2,19 +2,6 @@ import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 // import { convertAgeToBirthday } from "../utils"
 
-async function getFilters(selfUserId: string) {
-	const selfUserFiltersDocRef = admin
-		.firestore()
-		.collection("users")
-		.doc(selfUserId)
-		.collection("settings")
-		.doc("filters")
-
-	const filtersSnapshot = await selfUserFiltersDocRef.get()
-	const res = filtersSnapshot.data()
-	return res
-}
-
 export const getHotUsers = functions.https.onCall(async (filters, context) => {
 	const authUser = context.auth
 
