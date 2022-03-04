@@ -6,7 +6,7 @@ import { callMe } from "./user/callMe"
 import { updateFilters } from "./user/updateFilters"
 import { getSuggestedUsers } from "./suggested"
 import { getHotUsers } from "./hot"
-import { sendMessage } from "./message"
+import { sendMessage } from "./message/send"
 import { uploadPhoto } from "./user/uploadPhoto"
 
 admin.initializeApp()
