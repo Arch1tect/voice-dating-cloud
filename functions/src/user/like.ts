@@ -1,5 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
+import { sendPushNotifications } from "../notification/expo"
+import { ExpoPushMessage } from "expo-server-sdk"
 
 export const like = functions.https.onCall((data, context) => {
 	const authUser = context.auth
@@ -30,7 +32,6 @@ export const like = functions.https.onCall((data, context) => {
 
 	if (like) {
 		selfUserLikedDocRef.set({ id: targetUserId, createdAt: new Date() })
-
 		targetUserLikedDocRef.set({ id: selfUserId, createdAt: new Date() })
 	} else {
 		selfUserLikedDocRef.delete()
@@ -42,6 +43,16 @@ export const like = functions.https.onCall((data, context) => {
 	})
 
 	// TODO: check today's like quota and update it
+	if (like) {
+		const notificationData: ExpoPushMessage = {
+			to: "ExponentPushToken[PJ3lLiNmbxyGhFIcZmywSU]",
+			// data: {},
+			title: "Someone just liked you!",
+			// body: data.text,
+			sound: "default",
+		}
+		sendPushNotifications([notificationData])
+	}
 
 	return { success: true }
 })
