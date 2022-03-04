@@ -15,16 +15,15 @@ async function getFilters(selfUserId: string) {
 	return res
 }
 
-export const getHotUsers = functions.https.onCall(async (data, context) => {
+export const getHotUsers = functions.https.onCall(async (filters, context) => {
 	const authUser = context.auth
 
 	if (!authUser) {
 		console.error("401")
 		return
 	}
-	const { uid: selfUserId } = authUser
+	// const { uid: selfUserId } = authUser
 
-	const filters = (await getFilters(selfUserId)) || {}
 	const { gender } = filters
 
 	// TODO: get state from filter
