@@ -2,7 +2,16 @@ import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import * as sharp from "sharp"
 // import * as fs from "fs"
+type Image = {
+	small: string
+	medium: string
+	large: string
+}
 
+type FileSize = {
+	name: "small" | "medium" | "large"
+	value: number
+}
 async function resizeAndUpload(
 	filePath: string,
 	size: number,
@@ -24,15 +33,15 @@ export const uploadPhoto = functions.https.onCall(async (data, context) => {
 
 	const buffer = Buffer.from(data.split(",")[1], "base64")
 
-	const fileSizes = [
+	const fileSizes: FileSize[] = [
 		{ name: "small", value: 200 },
 		{ name: "medium", value: 720 },
 		{ name: "large", value: 1080 },
 	]
 	const timestamp = new Date().getTime()
-	const res: { [key: string]: string } = {}
+	const res: Image = { small: "", medium: "", large: "" }
 	for (let index = 0; index < fileSizes.length; index++) {
-		const { value, name } = fileSizes[index]
+		const { name, value } = fileSizes[index]
 		const filePath = `users/${selfUserId}/profile/${timestamp}-${value}.jpg`
 
 		if (name !== "large") {
