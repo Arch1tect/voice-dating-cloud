@@ -52,7 +52,7 @@ async function uploadPhoto(
 	const buffer = Buffer.from(imageDataUrl.split(",")[1], "base64")
 
 	const fileSizes: FileSize[] = [
-		{ name: "small", value: 200 },
+		{ name: "small", value: 480 },
 		{ name: "large", value: 1080 },
 	]
 	const timestamp = new Date().getTime()
