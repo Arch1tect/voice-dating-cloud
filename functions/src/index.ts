@@ -9,6 +9,7 @@ import { getHotUsers } from "./hot"
 import { sendMessage } from "./message/send"
 import { getMessages } from "./message/getMessages"
 import { uploadPhoto } from "./user/uploadPhoto"
+import { saveLastReadMessageTime } from "./message/saveLastReadMessageTime"
 
 admin.initializeApp()
 
@@ -22,3 +23,4 @@ exports.getHotUsers = getHotUsers
 exports.sendMessage = sendMessage
 exports.getMessages = getMessages
 exports.uploadPhoto = uploadPhoto
+exports.saveLastReadMessageTime = saveLastReadMessageTime
