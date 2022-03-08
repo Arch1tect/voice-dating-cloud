@@ -4,6 +4,7 @@ import * as admin from "firebase-admin"
 type Conversation = {
 	contactUser: any
 	messages: []
+	lastReadTime: number | undefined | null
 	lastMessage: any
 }
 type ConversationDict = {
@@ -13,7 +14,7 @@ type ConversationDict = {
 async function getMessagesOfOneContact(
 	contactId: string,
 	selfUserId: string,
-	conversationDict: { [key: string]: any }
+	conversationDict: ConversationDict
 ) {
 	const messagesQueryRes = await admin
 		.firestore()
@@ -54,13 +55,26 @@ async function getMessagesOfOneContact(
 			await admin.firestore().collection("users").doc(contactId).get()
 		).data()
 
-		const lastMessage = messages[messages.length - 1]
+		const contactUserMetadata = (
+			await admin
+				.firestore()
+				.collection("users")
+				.doc(selfUserId)
+				.collection("contacts")
+				.doc(contactId)
+				.get()
+		).data()
 
+		const lastMessage = messages[messages.length - 1]
+		const lastReadTime =
+			contactUserMetadata?.lastReadMessageTime?.seconds * 1000
 		conversationDict[contactId] = {
 			messages,
 			contactUser,
 			lastMessage,
+			lastReadTime,
 		}
+		// console.log("lastReadTime", lastReadTime)
 	}
 }
 
