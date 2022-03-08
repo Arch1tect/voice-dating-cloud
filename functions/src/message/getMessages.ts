@@ -66,8 +66,9 @@ async function getMessagesOfOneContact(
 		).data()
 
 		const lastMessage = messages[messages.length - 1]
-		const lastReadTime =
-			contactUserMetadata?.lastReadMessageTime?.seconds * 1000
+		const lastReadTime = contactUserMetadata?.lastReadMessageTime
+			? contactUserMetadata?.lastReadMessageTime.seconds * 1000
+			: null
 		conversationDict[contactId] = {
 			messages,
 			contactUser,
