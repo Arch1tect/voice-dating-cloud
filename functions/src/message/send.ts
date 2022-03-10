@@ -75,7 +75,10 @@ export const sendMessage = functions.https.onCall(
 
 		if (!authUser) {
 			console.error("401")
-			return
+			return {
+				success: false,
+				errorCode: 401,
+			}
 		}
 		const { uid: selfUserId } = authUser
 		const {

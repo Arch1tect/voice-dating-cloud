@@ -7,7 +7,10 @@ export const getHotUsers = functions.https.onCall(async (filters, context) => {
 
 	if (!authUser) {
 		console.error("401")
-		return
+		return {
+			success: false,
+			errorCode: 401,
+		}
 	}
 	// const { uid: selfUserId } = authUser
 
@@ -42,6 +45,9 @@ export const getHotUsers = functions.https.onCall(async (filters, context) => {
 		res.push(docSnapshot.data())
 	})
 
-	console.log(res.length)
-	return res
+	// console.log(res.length)
+	return {
+		success: true,
+		data: res,
+	}
 })

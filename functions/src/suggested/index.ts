@@ -15,7 +15,10 @@ export const getSuggestedUsers = functions.https.onCall(
 
 		if (!authUser) {
 			console.error("401")
-			return
+			return {
+				success: false,
+				errorCode: 401,
+			}
 		}
 		// const { uid: selfUserId } = authUser
 		// Client must always send the filters when calling
@@ -40,6 +43,9 @@ export const getSuggestedUsers = functions.https.onCall(
 		queryResult.forEach((docSnapshot) => {
 			res.push(docSnapshot.data())
 		})
-		return res
+		return {
+			success: true,
+			data: res,
+		}
 	}
 )

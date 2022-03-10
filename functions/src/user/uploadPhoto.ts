@@ -27,7 +27,10 @@ export const uploadPhoto = functions.https.onCall(async (data, context) => {
 
 	if (!authUser) {
 		console.error("401")
-		return
+		return {
+			success: false,
+			errorCode: 401,
+		}
 	}
 	const { uid: selfUserId } = authUser
 
@@ -56,5 +59,8 @@ export const uploadPhoto = functions.https.onCall(async (data, context) => {
 		res[name] = publicUrl
 	}
 
-	return res
+	return {
+		success: true,
+		data: res,
+	}
 })

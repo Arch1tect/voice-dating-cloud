@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 
-export const updateFilters = functions.https.onCall((data, context) => {
+export const impersonate = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
 
 	if (!authUser) {
@@ -13,15 +13,23 @@ export const updateFilters = functions.https.onCall((data, context) => {
 	}
 	const { uid: selfUserId } = authUser
 
-	const filtersRef = admin
+	const metadataDoc = await admin
 		.firestore()
 		.collection("users")
 		.doc(selfUserId)
 		.collection("settings")
-		.doc("filters")
+		.doc("meta")
+		.get()
 
-	// TODO: sanity user input
-	filtersRef.set({ ...data, updatedAt: new Date() }, { merge: true })
+	if (!metadataDoc.exists) {
+		return {
+			success: false,
+			errorCode: 403,
+			errorMessage: "metadata not exist",
+		}
+	}
 
-	return { success: true }
+	const metadata = metadataDoc.data()
+
+	// return conversationDict
 })
