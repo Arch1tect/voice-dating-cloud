@@ -1,6 +1,8 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 
+import { getRole } from "./getRole"
+
 export const impersonate = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
 
@@ -12,24 +14,20 @@ export const impersonate = functions.https.onCall(async (data, context) => {
 		}
 	}
 	const { uid: selfUserId } = authUser
+	const { targetUserId } = data
+	const role = await getRole(selfUserId)
 
-	const metadataDoc = await admin
-		.firestore()
-		.collection("users")
-		.doc(selfUserId)
-		.collection("settings")
-		.doc("meta")
-		.get()
-
-	if (!metadataDoc.exists) {
+	if (role !== "admin") {
+		console.error("Must be admin to impersonate")
 		return {
 			success: false,
 			errorCode: 403,
-			errorMessage: "metadata not exist",
 		}
 	}
 
-	const metadata = metadataDoc.data()
-
-	// return conversationDict
+	const impersonateToken = await admin.auth().createCustomToken(targetUserId)
+	return {
+		success: true,
+		data: impersonateToken,
+	}
 })

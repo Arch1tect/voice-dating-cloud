@@ -13,14 +13,14 @@ export const saveLastReadMessageTime = functions.https.onCall(
 			}
 		}
 		const { uid: selfUserId } = authUser
-		const { contactUserId } = clientInput
+		const { contactId } = clientInput
 
 		admin
 			.firestore()
 			.collection("users")
 			.doc(selfUserId)
 			.collection("contacts")
-			.doc(contactUserId)
+			.doc(contactId)
 			.update({ lastReadMessageTime: new Date() })
 
 		return { success: true }

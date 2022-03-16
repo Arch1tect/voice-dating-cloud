@@ -10,6 +10,7 @@ import { sendMessage } from "./message/send"
 import { getMessages } from "./message/getMessages"
 import { uploadPhoto } from "./user/uploadPhoto"
 import { saveLastReadMessageTime } from "./message/saveLastReadMessageTime"
+import { impersonate } from "./admin/impersonate"
 
 admin.initializeApp()
 
@@ -24,3 +25,4 @@ exports.sendMessage = sendMessage
 exports.getMessages = getMessages
 exports.uploadPhoto = uploadPhoto
 exports.saveLastReadMessageTime = saveLastReadMessageTime
+exports.impersonate = impersonate
