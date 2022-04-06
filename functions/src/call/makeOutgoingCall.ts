@@ -6,8 +6,10 @@ function isBeingCalled(targetUserCallData: any) {
 		const { calledAt } = targetUserCallData.incomingCall
 		// maybe previous call data wasn't cleaned up properly
 		// therefore we check the last call time
-		console.log("calledAt", calledAt)
-		return true
+		// console.log("calledAt", calledAt)
+		const now = new Date().getTime()
+		// if older than 30 seconds then it's a previous call
+		return now - calledAt.seconds * 1000 < 1000 * 30
 	}
 	return false
 }
