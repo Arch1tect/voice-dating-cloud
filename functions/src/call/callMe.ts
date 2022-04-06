@@ -21,9 +21,12 @@ export const callMe = functions.https.onCall((data, context) => {
 		.collection("settings")
 		.doc("call")
 
-	callRef.update({
-		callMeEnabledTime: isCallMeEnabled ? new Date() : false,
-	})
+	callRef.set(
+		{
+			callMeEnabledTime: isCallMeEnabled ? new Date() : false,
+		},
+		{ merge: true }
+	)
 
 	return { success: true }
 })
