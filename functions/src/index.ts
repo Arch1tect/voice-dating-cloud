@@ -11,6 +11,8 @@ import { getMessages } from "./message/getMessages"
 import { uploadPhoto } from "./user/uploadPhoto"
 import { saveLastReadMessageTime } from "./message/saveLastReadMessageTime"
 import { impersonate } from "./admin/impersonate"
+import { makeOutgoingCall } from "./call/makeOutgoingCall"
+import { answerCall } from "./call/answerCall"
 
 admin.initializeApp()
 
@@ -26,3 +28,5 @@ exports.getMessages = getMessages
 exports.uploadPhoto = uploadPhoto
 exports.saveLastReadMessageTime = saveLastReadMessageTime
 exports.impersonate = impersonate
+exports.makeOutgoingCall = makeOutgoingCall
+exports.answerCall = answerCall
