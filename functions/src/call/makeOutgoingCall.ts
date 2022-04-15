@@ -1,37 +1,49 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
+import { CALL_STATES } from "./state"
 
-function isBeingCalled(targetUserCallData: any) {
-	if (targetUserCallData?.incomingCall) {
-		const { calledAt } = targetUserCallData.incomingCall
-		// maybe previous call data wasn't cleaned up properly
-		// therefore we check the last call time
-		// console.log("calledAt", calledAt)
-		const now = new Date().getTime()
-		// if older than 30 seconds then it's a previous call
-		return now - calledAt.seconds * 1000 < 1000 * 30
-	}
-	return false
-}
+// function isBeingCalled(targetUserCallData: any) {
+// 	if (targetUserCallData?.incomingCall) {
+// 		const { calledAt } = targetUserCallData.incomingCall
+// 		// maybe previous call data wasn't cleaned up properly
+// 		// therefore we check the last call time
+// 		// console.log("calledAt", calledAt)
+// 		const now = new Date().getTime()
+// 		// if older than 30 seconds then it's a previous call
+// 		return now - calledAt.seconds * 1000 < 1000 * 30
+// 	}
+// 	return false
+// }
 
-function allowCall(targetUserCallData: any) {
-	if (targetUserCallData?.callMeEnabledTime) {
+async function doesTargetAllowCall(targetUserId: string) {
+	// Shouldn't really need this gard if frontend
+	// is working properly
+	const targetUserAllowCallRef = admin
+		.firestore()
+		.collection("users")
+		.doc(targetUserId)
+		.collection("call")
+		.doc("allowIncomingCall")
+
+	const allowCallFlag = (await targetUserAllowCallRef.get()).data()
+
+	if (allowCallFlag?.enabledTime) {
 		// TODO: check time
 		return true
 	}
 	return false
 }
 
-function hasOngoingCall(targetUserCallData: any) {
-	if (targetUserCallData?.ongoingCall) {
-		// TBD: there should be heartbeat mechanism
-		// and we can check heartbeat to decide if the 'ongoingCall'
-		// is still active or not.
+// function hasOngoingCall(targetUserCallData: any) {
+// 	if (targetUserCallData?.ongoingCall) {
+// 		// TBD: there should be heartbeat mechanism
+// 		// and we can check heartbeat to decide if the 'ongoingCall'
+// 		// is still active or not.
 
-		return true
-	}
-	return false
-}
+// 		return true
+// 	}
+// 	return false
+// }
 
 export const makeOutgoingCall = functions.https.onCall(
 	async (data, context) => {
@@ -47,40 +59,52 @@ export const makeOutgoingCall = functions.https.onCall(
 		const { uid: selfUserId } = authUser
 		const { targetUserId } = data
 
-		const targetUserCallRef = admin
-			.firestore()
-			.collection("users")
-			.doc(targetUserId)
-			.collection("settings")
-			.doc("call")
-
-		const targetUserCallData = (await targetUserCallRef.get()).data()
-
-		if (!allowCall(targetUserCallData)) {
+		if (!(await doesTargetAllowCall(targetUserId))) {
 			return {
 				success: false,
 				errorCode: 400,
 			}
 		}
 
-		if (isBeingCalled(targetUserCallData)) {
-			return {
-				success: false,
-				errorCode: 429,
-			}
-		}
-		if (hasOngoingCall(targetUserCallData)) {
-			return {
-				success: false,
-				errorCode: 409,
-			}
-		}
+		// if (isBeingCalled(targetUserCallData)) {
+		// 	return {
+		// 		success: false,
+		// 		errorCode: 429,
+		// 	}
+		// }
+		// if (hasOngoingCall(targetUserCallData)) {
+		// 	return {
+		// 		success: false,
+		// 		errorCode: 409,
+		// 	}
+		// }
 
-		targetUserCallRef.update({
-			incomingCall: {
-				callerId: selfUserId,
-				calledAt: new Date(),
-			},
+		const callerRef = admin
+			.firestore()
+			.collection("users")
+			.doc(targetUserId)
+			.collection("call")
+			.doc("call")
+
+		const now = new Date()
+
+		callerRef.set({
+			contactId: targetUserId,
+			calledAt: now,
+			state: CALL_STATES.WAITING_FOR_OTHER_TO_PICKUP,
+		})
+
+		const calleeRef = admin
+			.firestore()
+			.collection("users")
+			.doc(selfUserId)
+			.collection("call")
+			.doc("call")
+
+		calleeRef.set({
+			contactId: selfUserId,
+			calledAt: now,
+			state: CALL_STATES.WAITING_FOR_SELF_TO_PICKUP,
 		})
 
 		return { success: true }

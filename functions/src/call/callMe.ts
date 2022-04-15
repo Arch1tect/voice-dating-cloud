@@ -12,18 +12,18 @@ export const callMe = functions.https.onCall((data, context) => {
 		}
 	}
 	const { uid: selfUserId } = authUser
-	const { isCallMeEnabled } = data
+	const { isEnabled } = data
 
 	const callRef = admin
 		.firestore()
 		.collection("users")
 		.doc(selfUserId)
-		.collection("settings")
-		.doc("call")
+		.collection("call")
+		.doc("allowIncomingCall")
 
 	callRef.set(
 		{
-			callMeEnabledTime: isCallMeEnabled ? new Date() : false,
+			enabledTime: isEnabled ? new Date() : false,
 		},
 		{ merge: true }
 	)
