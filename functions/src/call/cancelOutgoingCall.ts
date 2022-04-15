@@ -37,7 +37,7 @@ export const cancelOutgoingCall = functions.https.onCall(
 			state: CALL_STATES.OTHER_CANCELED_CALL,
 		})
 		await sleep(3000)
-		callerRef.set({})
+		calleeRef.set({})
 		return { success: true }
 	}
 )

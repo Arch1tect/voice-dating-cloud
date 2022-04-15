@@ -82,7 +82,7 @@ export const makeOutgoingCall = functions.https.onCall(
 		const callerRef = admin
 			.firestore()
 			.collection("users")
-			.doc(targetUserId)
+			.doc(selfUserId)
 			.collection("call")
 			.doc("call")
 
@@ -97,7 +97,7 @@ export const makeOutgoingCall = functions.https.onCall(
 		const calleeRef = admin
 			.firestore()
 			.collection("users")
-			.doc(selfUserId)
+			.doc(targetUserId)
 			.collection("call")
 			.doc("call")
 
