@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { CALL_STATES } from "./state"
-import { sleep } from "../utils"
+// import { CALL_STATES } from "./state"
+// import { sleep } from "../utils"
 
 export const hangUp = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
@@ -32,10 +32,13 @@ export const hangUp = functions.https.onCall(async (data, context) => {
 		.collection("call")
 		.doc("call")
 
-	contactCallRef.update({
-		state: CALL_STATES.OTHER_HANG_UP,
-	})
-	await sleep(3000)
+	// Let client handle contact hang up cases
+	// with RTC tools which is more reliable than cloud function
+
+	// contactCallRef.update({
+	// 	state: CALL_STATES.OTHER_HANG_UP,
+	// })
+	// await sleep(3000)
 	contactCallRef.set({})
 	return { success: true }
 })
