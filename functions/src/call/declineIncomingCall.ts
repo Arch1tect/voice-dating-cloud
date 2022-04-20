@@ -32,7 +32,7 @@ export const declineIncomingCall = functions.https.onCall(
 			.collection("call")
 			.doc("call")
 		callerRef.update({
-			state: CALL_STATES.OTHER_CANCELED_CALL,
+			state: CALL_STATES.OTHER_DECLINED_TO_ANSWER,
 		})
 
 		await sleep(3000)
