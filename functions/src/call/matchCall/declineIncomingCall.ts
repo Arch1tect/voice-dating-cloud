@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { CALL_STATES } from "./state"
-import { sleep } from "../utils"
+import { CALL_STATES } from "../state"
+import { sleep } from "../../utils"
 
 export const declineIncomingCall = functions.https.onCall(
 	async (data, context) => {

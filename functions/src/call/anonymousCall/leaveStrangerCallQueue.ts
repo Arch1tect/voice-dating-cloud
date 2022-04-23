@@ -1,9 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { CALL_STATES } from "./state"
-import { sleep } from "../utils"
 
-export const cancelOutgoingCall = functions.https.onCall(
+export const leaveStrangerCallQueue = functions.https.onCall(
 	async (data, context) => {
 		const authUser = context.auth
 
@@ -15,29 +13,22 @@ export const cancelOutgoingCall = functions.https.onCall(
 			}
 		}
 		const { uid: selfUserId } = authUser
-		const { contactId } = data
 
-		const callerRef = admin
+		const selfCallRef = admin
 			.firestore()
 			.collection("users")
 			.doc(selfUserId)
 			.collection("call")
 			.doc("call")
+		selfCallRef.set({})
 
-		callerRef.set({})
-
-		const calleeRef = admin
+		const callQueueRef = admin
 			.firestore()
-			.collection("users")
-			.doc(contactId)
-			.collection("call")
-			.doc("call")
+			.collection("anonymousCallQueue")
+			.doc(selfUserId)
 
-		calleeRef.update({
-			state: CALL_STATES.OTHER_CANCELED_CALL,
-		})
-		await sleep(3000)
-		calleeRef.set({})
+		callQueueRef.delete()
+
 		return { success: true }
 	}
 )

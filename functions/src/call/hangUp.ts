@@ -32,13 +32,6 @@ export const hangUp = functions.https.onCall(async (data, context) => {
 		.collection("call")
 		.doc("call")
 
-	// Let client handle contact hang up cases
-	// with RTC tools which is more reliable than cloud function
-
-	// contactCallRef.update({
-	// 	state: CALL_STATES.OTHER_HANG_UP,
-	// })
-	// await sleep(3000)
 	contactCallRef.set({})
 	return { success: true }
 })

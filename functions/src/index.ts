@@ -11,12 +11,15 @@ import { uploadPhoto } from "./user/uploadPhoto"
 import { saveLastReadMessageTime } from "./message/saveLastReadMessageTime"
 import { impersonate } from "./admin/impersonate"
 
-import { callMe } from "./call/callMe"
-import { makeOutgoingCall } from "./call/makeOutgoingCall"
-import { answerCall } from "./call/answerCall"
+import { callMe } from "./call/matchCall/callMe"
+import { makeOutgoingCall } from "./call/matchCall/makeOutgoingCall"
+import { answerCall } from "./call/matchCall/answerCall"
 import { hangUp } from "./call/hangUp"
-import { declineIncomingCall } from "./call/declineIncomingCall"
-import { cancelOutgoingCall } from "./call/cancelOutgoingCall"
+import { declineIncomingCall } from "./call/matchCall/declineIncomingCall"
+import { cancelOutgoingCall } from "./call/matchCall/cancelOutgoingCall"
+
+import { joinStrangerCallQueue } from "./call/anonymousCall/joinStrangerCallQueue"
+import { leaveStrangerCallQueue } from "./call/anonymousCall/leaveStrangerCallQueue"
 
 admin.initializeApp()
 
@@ -37,4 +40,8 @@ exports.makeOutgoingCall = makeOutgoingCall
 exports.cancelOutgoingCall = cancelOutgoingCall
 exports.answerCall = answerCall
 exports.declineIncomingCall = declineIncomingCall
+
+exports.joinStrangerCallQueue = joinStrangerCallQueue
+exports.leaveStrangerCallQueue = leaveStrangerCallQueue
+
 exports.hangUp = hangUp

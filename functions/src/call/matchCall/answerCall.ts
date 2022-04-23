@@ -1,11 +1,9 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 
-import { RtcTokenBuilder, RtcRole } from "agora-access-token"
-import { CALL_STATES } from "./state"
+import { CALL_STATES } from "../state"
+import { getToken } from "../agora"
 
-const AGORA_APP_ID = "3689fa0281824e40b959a80f9b42a2be"
-const AGORA_APP_CERT = "73656b3448974900bcf3b3fdae191693"
 export const answerCall = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
 
@@ -32,24 +30,9 @@ export const answerCall = functions.https.onCall(async (data, context) => {
 		.collection("call")
 		.doc("call")
 
-	const currentTime = Math.floor(Date.now() / 1000)
 	const channelName = `${contactId}-${selfUserId}`
-	const callerToken = RtcTokenBuilder.buildTokenWithUid(
-		AGORA_APP_ID,
-		AGORA_APP_CERT,
-		channelName,
-		0,
-		RtcRole.PUBLISHER,
-		currentTime + 60 * 60 * 2
-	)
-	const calleeToken = RtcTokenBuilder.buildTokenWithUid(
-		AGORA_APP_ID,
-		AGORA_APP_CERT,
-		channelName,
-		1,
-		RtcRole.PUBLISHER,
-		currentTime + 60 * 60 * 2
-	)
+	const callerToken = getToken(channelName, 0)
+	const calleeToken = getToken(channelName, 1)
 
 	callerRef.update({
 		state: CALL_STATES.CONNECTED,
