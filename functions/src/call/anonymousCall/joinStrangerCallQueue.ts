@@ -115,8 +115,9 @@ export const joinStrangerCallQueue = functions.https.onCall(
 
 			targetCallRef.set({
 				contactId: selfUserId,
-				contact: selfUser,
+				// contact: selfUser, // user decide if they want to expose identity
 				calledAt: now,
+				mode: "anonymous",
 				state: CALL_STATES.CONNECTED,
 				callMetadata: {
 					channelName,
@@ -127,8 +128,9 @@ export const joinStrangerCallQueue = functions.https.onCall(
 
 			selfCallRef.set({
 				contactId: targetUser.id,
-				contact: targetUser,
+				// contact: targetUser,  // user decide if they want to expose identity
 				calledAt: now,
+				mode: "anonymous",
 				state: CALL_STATES.CONNECTED,
 				callMetadata: {
 					channelName,
