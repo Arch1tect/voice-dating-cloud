@@ -57,7 +57,16 @@ export const makeOutgoingCall = functions.https.onCall(
 			}
 		}
 		const { uid: selfUserId } = authUser
+
+		const selfUser = (
+			await admin.firestore().collection("users").doc(selfUserId).get()
+		).data()
+
 		const { targetUserId } = data
+
+		const targetUser = (
+			await admin.firestore().collection("users").doc(targetUserId).get()
+		).data()
 
 		if (!(await doesTargetAllowCall(targetUserId))) {
 			return {
@@ -90,6 +99,7 @@ export const makeOutgoingCall = functions.https.onCall(
 
 		callerRef.set({
 			contactId: targetUserId,
+			contact: targetUser,
 			calledAt: now,
 			state: CALL_STATES.WAITING_FOR_OTHER_TO_PICKUP,
 		})
@@ -103,6 +113,7 @@ export const makeOutgoingCall = functions.https.onCall(
 
 		calleeRef.set({
 			contactId: selfUserId,
+			contact: selfUser,
 			calledAt: now,
 			state: CALL_STATES.WAITING_FOR_SELF_TO_PICKUP,
 		})

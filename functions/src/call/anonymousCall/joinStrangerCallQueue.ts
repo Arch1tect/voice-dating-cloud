@@ -3,11 +3,11 @@ import * as admin from "firebase-admin"
 import { CALL_STATES } from "../state"
 import { getToken } from "../agora"
 
-async function joinCallQueue(selfUserId: string) {
+async function joinCallQueue(selfUser: any, selfFilter: any) {
 	const callRef = admin
 		.firestore()
 		.collection("users")
-		.doc(selfUserId)
+		.doc(selfUser.id)
 		.collection("call")
 		.doc("call")
 
@@ -21,38 +21,40 @@ async function joinCallQueue(selfUserId: string) {
 	const callQueueRef = admin
 		.firestore()
 		.collection("anonymousCallQueue")
-		.doc(selfUserId)
+		.doc(selfUser.id)
 
 	// TODO: client should include user's info and filter when queuing
-
-	callQueueRef.set({ id: selfUserId, calledAt: now })
+	callQueueRef.set({
+		user: selfUser,
+		filters: selfFilter,
+		calledAt: now,
+	})
 }
 
-async function findTargetFromQueue() {
+async function findTargetFromQueue(selfUserData: any, selfFilterData: any) {
 	let targetUser = null
 	const contactQueryRes = await admin
 		.firestore()
 		.collection("anonymousCallQueue")
 		.orderBy("calledAt", "desc")
 		.get()
-	const users: any = []
+	const callQueue: any = []
 	// console.log(messagesQueryRes.docs.length)
 	contactQueryRes.forEach((docSnapshot) => {
-		const user = docSnapshot.data()
-		users.push(user)
+		callQueue.push(docSnapshot.data())
 	})
 
-	for (let index = 0; index < users.length; index++) {
-		const user = users[index]
-		// TODO: check each user's filter and info
+	for (let index = 0; index < callQueue.length; index++) {
+		// const { user, filters } = callQueue[index]
+		const { user } = callQueue[index]
 
+		// TODO: check each user's filter and info against self user data
 		targetUser = user
 		// remove target from queue
 		const targetQueueRef = admin
 			.firestore()
 			.collection("anonymousCallQueue")
 			.doc(targetUser.id)
-
 		targetQueueRef.delete()
 		break
 	}
@@ -73,7 +75,22 @@ export const joinStrangerCallQueue = functions.https.onCall(
 		}
 		const { uid: selfUserId } = authUser
 
-		const targetUser = await findTargetFromQueue()
+		const selfUser = (
+			await admin.firestore().collection("users").doc(selfUserId).get()
+		).data()
+
+		const selfFilter =
+			(
+				await admin
+					.firestore()
+					.collection("users")
+					.doc(selfUserId)
+					.collection("settings")
+					.doc("filters")
+					.get()
+			).data() || {}
+
+		const targetUser = await findTargetFromQueue(selfUser, selfFilter)
 
 		if (targetUser) {
 			const selfCallRef = admin
@@ -98,6 +115,7 @@ export const joinStrangerCallQueue = functions.https.onCall(
 
 			targetCallRef.set({
 				contactId: selfUserId,
+				contact: selfUser,
 				calledAt: now,
 				state: CALL_STATES.CONNECTED,
 				callMetadata: {
@@ -109,6 +127,7 @@ export const joinStrangerCallQueue = functions.https.onCall(
 
 			selfCallRef.set({
 				contactId: targetUser.id,
+				contact: targetUser,
 				calledAt: now,
 				state: CALL_STATES.CONNECTED,
 				callMetadata: {
@@ -118,7 +137,7 @@ export const joinStrangerCallQueue = functions.https.onCall(
 				},
 			})
 		} else {
-			await joinCallQueue(selfUserId)
+			await joinCallQueue(selfUser, selfFilter)
 		}
 
 		return { success: true }
