@@ -5,33 +5,15 @@ import * as sharp from "sharp"
 import { sendPushNotifications } from "../notification/expo"
 import { ExpoPushMessage } from "expo-server-sdk"
 
-type Image = {
-	small: string
-	large: string
-}
+import {
+	Image,
+	MessageDataToSaveIntoFirestore,
+	MessageDataFromClient,
+} from "./type"
 
 type FileSize = {
 	name: "small" | "large"
 	value: number
-}
-
-type MessageDataFromClient = {
-	imageDataUrl?: string
-	text?: string
-	_id: string
-	// createdAt: string // shouldn't get this from client side
-	senderId: string
-	senderName: string
-	receiverId: string
-}
-
-type MessageDataToSaveIntoFirestore = {
-	image?: Image
-	text?: string
-	_id: string
-	createdAt: Date
-	senderId: string
-	receiverId: string
 }
 
 async function resizeAndUpload(

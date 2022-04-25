@@ -21,6 +21,7 @@ import { cancelOutgoingCall } from "./call/matchCall/cancelOutgoingCall"
 import { joinStrangerCallQueue } from "./call/anonymousCall/joinStrangerCallQueue"
 import { leaveStrangerCallQueue } from "./call/anonymousCall/leaveStrangerCallQueue"
 import { exposeIdentity } from "./call/anonymousCall/exposeIdentity"
+import { unlockMessaging } from "./call/anonymousCall/unlockMessaging"
 
 admin.initializeApp()
 
@@ -45,5 +46,6 @@ exports.declineIncomingCall = declineIncomingCall
 exports.joinStrangerCallQueue = joinStrangerCallQueue
 exports.leaveStrangerCallQueue = leaveStrangerCallQueue
 exports.exposeIdentity = exposeIdentity
+exports.unlockMessaging = unlockMessaging
 
 exports.hangUp = hangUp

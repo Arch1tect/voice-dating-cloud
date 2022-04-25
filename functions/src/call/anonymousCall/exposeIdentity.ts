@@ -1,9 +1,6 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-
-type callData = {
-	hasExposedIdentity?: boolean
-}
+import { CallData } from "../type"
 
 // TBD: important, there is race condition when we implement it this way.
 // An alternative would be for client to check for the state that both self
@@ -63,15 +60,19 @@ export const exposeIdentity = functions.https.onCall(async (data, context) => {
 	}
 	const { uid: selfUserId } = authUser
 	const { contactId } = data
-	const selfCallRef = admin
-		.firestore()
-		.collection("users")
-		.doc(selfUserId)
-		.collection("call")
-		.doc("call")
-	selfCallRef.update({
-		hasExposedIdentity: true, // user decide if they want to expose identity
-	})
+	const selfCallData = (
+		await admin
+			.firestore()
+			.collection("users")
+			.doc(selfUserId)
+			.collection("call")
+			.doc("call")
+			.get()
+	).data() as CallData
+	if (selfCallData.contact) {
+		// both has exposed identity, match two users now
+		matchUsers(selfUserId, contactId)
+	}
 
 	const selfUser = (
 		await admin.firestore().collection("users").doc(selfUserId).get()
@@ -83,10 +84,6 @@ export const exposeIdentity = functions.https.onCall(async (data, context) => {
 		.collection("call")
 		.doc("call")
 	contactCallRef.update({ contact: selfUser })
-	const contactCallData = (await contactCallRef.get()).data() as callData
-	if (contactCallData?.hasExposedIdentity) {
-		// both has exposed identity, match two users now
-		matchUsers(selfUserId, contactId)
-	}
+
 	return { success: true }
 })

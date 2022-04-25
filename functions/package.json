@@ -14,6 +14,7 @@
 	},
 	"main": "lib/index.js",
 	"dependencies": {
+		"@types/uuid": "^8.3.4",
 		"agora-access-token": "^2.0.4",
 		"expo-server-sdk": "^3.6.0",
 		"firebase-admin": "^9.8.0",
