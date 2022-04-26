@@ -21,8 +21,6 @@ async function becomeContacts(selfUserId: string, contactId: string) {
 		.collection("contacts")
 		.doc(contactId)
 
-	contactRef.set({ id: contactId, createdAt })
-
 	const selfRef = admin
 		.firestore()
 		.collection("users")
@@ -30,14 +28,13 @@ async function becomeContacts(selfUserId: string, contactId: string) {
 		.collection("contacts")
 		.doc(selfUserId)
 
+	await contactRef.collection("messages").doc(messageId).set(messageData)
+	await selfRef.collection("messages").doc(messageId).set(messageData)
+
+	// Note: we set message first then contact because client is listening to the update of contacts
+	// and pull messages right away, so we make sure message is already created before the contacts
 	selfRef.set({ id: selfUserId, createdAt })
-
-	const selfMessageRef = contactRef.collection("messages").doc(messageId)
-
-	const contactMessageRef = selfRef.collection("messages").doc(messageId)
-
-	selfMessageRef.set(messageData)
-	contactMessageRef.set(messageData)
+	contactRef.set({ id: contactId, createdAt })
 }
 
 export const unlockMessaging = functions.https.onCall(async (data, context) => {
