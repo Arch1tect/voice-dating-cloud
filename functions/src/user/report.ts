@@ -21,11 +21,6 @@ export const reportUser = functions.https.onCall(async (data, context) => {
 
 	const targetUserRef = admin.firestore().collection("users").doc(userId)
 
-	targetUserRef
-		.collection("reports")
-		.doc(reportId)
-		.set({ id: reportId, reporterId: selfUserId, reason })
-
 	const reportQueryRes = await targetUserRef.collection("reports").get()
 
 	let hasSameUserReportedTargetUserBefore = false
@@ -41,11 +36,10 @@ export const reportUser = functions.https.onCall(async (data, context) => {
 			reportCount: admin.firestore.FieldValue.increment(1),
 		})
 	}
-	admin
-		.firestore()
-		.collection("reports")
-		.doc(reportId)
-		.set({ id: reportId, userId, reporterId: selfUserId, reason })
+	const reportData = { id: reportId, userId, reporterId: selfUserId, reason }
+
+	targetUserRef.collection("reports").doc(reportId).set(reportData)
+	admin.firestore().collection("reports").doc(reportId).set(reportData)
 
 	return { success: true }
 })
