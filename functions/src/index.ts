@@ -22,6 +22,7 @@ import { joinStrangerCallQueue } from "./call/anonymousCall/joinStrangerCallQueu
 import { leaveStrangerCallQueue } from "./call/anonymousCall/leaveStrangerCallQueue"
 import { exposeIdentity } from "./call/anonymousCall/exposeIdentity"
 import { unlockMessaging } from "./call/anonymousCall/unlockMessaging"
+import { reportUser } from "./user/report"
 
 admin.initializeApp()
 
@@ -35,6 +36,7 @@ exports.sendMessage = sendMessage
 exports.getMessages = getMessages
 exports.uploadPhoto = uploadPhoto
 exports.saveLastReadMessageTime = saveLastReadMessageTime
+exports.reportUser = reportUser
 exports.impersonate = impersonate
 
 exports.callMe = callMe
