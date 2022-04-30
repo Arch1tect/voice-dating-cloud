@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 
-import { getRole } from "./getRole"
+import { getRole } from "../permission/getRole"
 
 export const impersonate = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
@@ -15,9 +15,9 @@ export const impersonate = functions.https.onCall(async (data, context) => {
 	}
 	const { uid: selfUserId } = authUser
 	const { targetUserId } = data
-	const role = await getRole(selfUserId)
+	const roleName = await getRole(selfUserId)
 
-	if (role !== "admin") {
+	if (roleName !== "admin") {
 		console.error("Must be admin to impersonate")
 		return {
 			success: false,

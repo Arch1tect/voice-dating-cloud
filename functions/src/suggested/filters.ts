@@ -20,7 +20,7 @@ export const getFilters = async (selfUserId: string) => {
 		.doc("filters")
 
 	const filtersSnapshot = await selfUserFiltersDocRef.get()
-	const res = filtersSnapshot.data()
+	const res = filtersSnapshot.data() || {}
 	return res as Filters
 }
 

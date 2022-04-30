@@ -23,6 +23,7 @@ import { leaveStrangerCallQueue } from "./call/anonymousCall/leaveStrangerCallQu
 import { exposeIdentity } from "./call/anonymousCall/exposeIdentity"
 import { unlockMessaging } from "./call/anonymousCall/unlockMessaging"
 import { reportUser } from "./user/report"
+import { getPermissions } from "./permission"
 
 admin.initializeApp()
 
@@ -49,5 +50,7 @@ exports.joinStrangerCallQueue = joinStrangerCallQueue
 exports.leaveStrangerCallQueue = leaveStrangerCallQueue
 exports.exposeIdentity = exposeIdentity
 exports.unlockMessaging = unlockMessaging
+
+exports.getPermissions = getPermissions
 
 exports.hangUp = hangUp
