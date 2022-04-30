@@ -63,6 +63,7 @@ export const like = functions.https.onCall((data, context) => {
 	if (like) {
 		selfUserLikedDocRef.set({ id: targetUserId, createdAt: new Date() })
 		targetUserLikedDocRef.set({ id: selfUserId, createdAt: new Date() })
+		updateLikeMetadata(selfUserId)
 	} else {
 		selfUserLikedDocRef.delete()
 		targetUserLikedDocRef.delete()
@@ -71,8 +72,6 @@ export const like = functions.https.onCall((data, context) => {
 	targetUserRef.update({
 		likeCount: admin.firestore.FieldValue.increment(like ? 1 : -1),
 	})
-
-	updateLikeMetadata(selfUserId)
 
 	// TODO: check today's like quota and update it
 	if (like) {

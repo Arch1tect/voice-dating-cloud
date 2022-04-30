@@ -2,11 +2,11 @@ import * as admin from "firebase-admin"
 
 const MATCH_CALL_QUOTA = 3
 const ANONYMOUS_CALL_QUOTA = 7
-const LIKE_QUOTA = 5
+const LIKE_QUOTA = 10
 
 const VIP_MATCH_CALL_QUOTA = 7
 const VIP_ANONYMOUS_CALL_QUOTA = 15
-const VIP_LIKE_QUOTA = 10
+const VIP_LIKE_QUOTA = 21
 
 function getTodaysCount(data: any) {
 	const timestamp = data.updatedAt.seconds * 1000
