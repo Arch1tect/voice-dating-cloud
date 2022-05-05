@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin"
 import { WhereFilterOp } from "@google-cloud/firestore"
-import { convertAgeToBirthday } from "../utils"
+import { convertAgeToBirthday } from "../../utils"
 type Filters = {
 	gender?: string
 	minAge?: number

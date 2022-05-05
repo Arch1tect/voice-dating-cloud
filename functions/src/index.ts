@@ -2,13 +2,16 @@ import * as admin from "firebase-admin"
 import { like } from "./user/like"
 import { editInfo } from "./user/editInfo"
 import { checkIn } from "./user/checkIn"
-import { updateFilters } from "./user/updateFilters"
-import { getSuggestedUsers } from "./suggested"
-import { getHotUsers } from "./hot"
-import { sendMessage } from "./message/send"
-import { getMessages } from "./message/getMessages"
+import { reportUser } from "./user/report"
 import { uploadPhoto } from "./user/uploadPhoto"
+
+import { getSuggestedUsers } from "./recommendation/suggested"
+import { getHotUsers } from "./recommendation/hot"
+
+import { getMessages } from "./message/getMessages"
+import { sendMessage } from "./message/send"
 import { saveLastReadMessageTime } from "./message/saveLastReadMessageTime"
+
 import { impersonate } from "./admin/impersonate"
 
 import { callMe } from "./call/matchCall/callMe"
@@ -22,23 +25,26 @@ import { joinStrangerCallQueue } from "./call/anonymousCall/joinStrangerCallQueu
 import { leaveStrangerCallQueue } from "./call/anonymousCall/leaveStrangerCallQueue"
 import { exposeIdentity } from "./call/anonymousCall/exposeIdentity"
 import { unlockMessaging } from "./call/anonymousCall/unlockMessaging"
-import { reportUser } from "./user/report"
+
 import { getPermissions } from "./permission"
+
+import { updateFilters } from "./settings/updateFilters"
+import { updatePreferences } from "./settings/updatePreferences"
 
 admin.initializeApp()
 
 exports.like = like
 exports.editInfo = editInfo
 exports.checkIn = checkIn
-exports.updateFilters = updateFilters
+exports.uploadPhoto = uploadPhoto
+exports.reportUser = reportUser
+
 exports.getSuggestedUsers = getSuggestedUsers
 exports.getHotUsers = getHotUsers
+
 exports.sendMessage = sendMessage
 exports.getMessages = getMessages
-exports.uploadPhoto = uploadPhoto
 exports.saveLastReadMessageTime = saveLastReadMessageTime
-exports.reportUser = reportUser
-exports.impersonate = impersonate
 
 exports.callMe = callMe
 exports.makeOutgoingCall = makeOutgoingCall
@@ -50,7 +56,11 @@ exports.joinStrangerCallQueue = joinStrangerCallQueue
 exports.leaveStrangerCallQueue = leaveStrangerCallQueue
 exports.exposeIdentity = exposeIdentity
 exports.unlockMessaging = unlockMessaging
+exports.hangUp = hangUp
 
 exports.getPermissions = getPermissions
 
-exports.hangUp = hangUp
+exports.updatePreferences = updatePreferences
+exports.updateFilters = updateFilters
+
+exports.impersonate = impersonate
