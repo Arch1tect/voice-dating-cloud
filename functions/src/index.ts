@@ -4,6 +4,7 @@ import { editInfo } from "./user/editInfo"
 import { checkIn } from "./user/checkIn"
 import { reportUser } from "./user/report"
 import { uploadPhoto } from "./user/uploadPhoto"
+import { signUp } from "./user/signup"
 
 import { getSuggestedUsers } from "./recommendation/suggested"
 import { getHotUsers } from "./recommendation/hot"
@@ -33,6 +34,7 @@ import { updatePreferences } from "./settings/updatePreferences"
 
 admin.initializeApp()
 
+exports.signUp = signUp
 exports.like = like
 exports.editInfo = editInfo
 exports.checkIn = checkIn
