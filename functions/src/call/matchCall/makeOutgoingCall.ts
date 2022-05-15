@@ -102,6 +102,7 @@ export const makeOutgoingCall = functions.https.onCall(
 			contact: targetUser,
 			calledAt: now,
 			state: CALL_STATES.WAITING_FOR_OTHER_TO_PICKUP,
+			mode: "match",
 		})
 
 		const calleeRef = admin
@@ -116,6 +117,7 @@ export const makeOutgoingCall = functions.https.onCall(
 			contact: selfUser,
 			calledAt: now,
 			state: CALL_STATES.WAITING_FOR_SELF_TO_PICKUP,
+			mode: "match",
 		})
 
 		return { success: true }

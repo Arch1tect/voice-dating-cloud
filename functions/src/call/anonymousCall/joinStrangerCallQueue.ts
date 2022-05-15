@@ -15,6 +15,7 @@ async function joinCallQueue(selfUser: any, selfFilter: any) {
 
 	callRef.set({
 		calledAt: now,
+		mode: "anonymous",
 		state: CALL_STATES.WAITING_FOR_STRANGER,
 	})
 
