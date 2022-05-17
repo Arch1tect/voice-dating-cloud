@@ -1,7 +1,5 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { CALL_STATES } from "../state"
-import { sleep } from "../../utils"
 
 export const cancelOutgoingCall = functions.https.onCall(
 	async (data, context) => {
@@ -14,31 +12,33 @@ export const cancelOutgoingCall = functions.https.onCall(
 				errorCode: 401,
 			}
 		}
-		const { uid: selfUserId } = authUser
-		const { contactId } = data
+		const { uid: callerId } = authUser
+		const { contactId: calleeId, callId } = data
 
-		const callerRef = admin
+		await admin
 			.firestore()
 			.collection("users")
-			.doc(selfUserId)
+			.doc(callerId)
 			.collection("call")
-			.doc("call")
+			.doc("event")
+			.set({
+				callId,
+				name: "outgoingCallCanceled",
+				createdAt: new Date(),
+			})
 
-		callerRef.set({})
-
-		const calleeRef = admin
+		await admin
 			.firestore()
 			.collection("users")
-			.doc(contactId)
+			.doc(calleeId)
 			.collection("call")
-			.doc("call")
+			.doc("event")
+			.set({
+				callId,
+				name: "incomingCallCanceled",
+				createdAt: new Date(),
+			})
 
-		calleeRef.update({
-			state: CALL_STATES.OTHER_CANCELED_CALL,
-		})
-		// must wait 3 sec so client receive the OTHER_CANCELED_CALL event
-		await sleep(3000)
-		calleeRef.set({})
 		return { success: true }
 	}
 )

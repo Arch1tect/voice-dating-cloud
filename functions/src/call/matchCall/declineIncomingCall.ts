@@ -1,7 +1,5 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { CALL_STATES } from "../state"
-import { sleep } from "../../utils"
 
 export const declineIncomingCall = functions.https.onCall(
 	async (data, context) => {
@@ -14,29 +12,21 @@ export const declineIncomingCall = functions.https.onCall(
 				errorCode: 401,
 			}
 		}
-		const { uid: selfUserId } = authUser
-		const { contactId } = data
+		// const { uid: selfUserId } = authUser
+		const { contactId: callerId, callId } = data
 
-		const calleeRef = admin
+		await admin
 			.firestore()
 			.collection("users")
-			.doc(selfUserId)
+			.doc(callerId)
 			.collection("call")
-			.doc("call")
-		calleeRef.set({})
+			.doc("event")
+			.set({
+				callId,
+				name: "outgoingCallDeclined",
+				createdAt: new Date(),
+			})
 
-		const callerRef = admin
-			.firestore()
-			.collection("users")
-			.doc(contactId)
-			.collection("call")
-			.doc("call")
-		callerRef.update({
-			state: CALL_STATES.OTHER_DECLINED_TO_ANSWER,
-		})
-
-		await sleep(3000)
-		callerRef.set({})
 		return { success: true }
 	}
 )

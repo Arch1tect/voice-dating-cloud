@@ -3,7 +3,7 @@ import * as admin from "firebase-admin"
 // import { CALL_STATES } from "./state"
 // import { sleep } from "../utils"
 
-export const hangUp = functions.https.onCall(async (data, context) => {
+export const hangUpMatchCall = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
 
 	if (!authUser) {
@@ -14,24 +14,23 @@ export const hangUp = functions.https.onCall(async (data, context) => {
 		}
 	}
 	const { uid: selfUserId } = authUser
-	const { contactId } = data
+	const { contactId, callId } = data
 
-	const selfCallRef = admin
+	admin
 		.firestore()
 		.collection("users")
 		.doc(selfUserId)
-		.collection("call")
-		.doc("call")
+		.collection("calls")
+		.doc(callId)
+		.update({ endedAt: new Date() })
 
-	selfCallRef.set({})
-
-	const contactCallRef = admin
+	admin
 		.firestore()
 		.collection("users")
 		.doc(contactId)
-		.collection("call")
-		.doc("call")
+		.collection("calls")
+		.doc(callId)
+		.update({ endedAt: new Date() })
 
-	contactCallRef.set({})
 	return { success: true }
 })

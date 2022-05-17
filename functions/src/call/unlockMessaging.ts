@@ -1,8 +1,8 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { v4 as uuidv4 } from "uuid"
-import { MessageDataToSaveIntoFirestore } from "../../message/type"
-import { CallData } from "../type"
+import { MessageDataToSaveIntoFirestore } from "../message/type"
+import { CallData } from "./type"
 
 async function becomeContacts(selfUserId: string, contactId: string) {
 	const createdAt = new Date()

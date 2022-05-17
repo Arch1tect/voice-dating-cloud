@@ -18,14 +18,14 @@ import { impersonate } from "./admin/impersonate"
 import { callMe } from "./call/matchCall/callMe"
 import { makeOutgoingCall } from "./call/matchCall/makeOutgoingCall"
 import { answerCall } from "./call/matchCall/answerCall"
-import { hangUp } from "./call/hangUp"
+import { hangUpMatchCall } from "./call/matchCall/hangUpMatchCall"
 import { declineIncomingCall } from "./call/matchCall/declineIncomingCall"
 import { cancelOutgoingCall } from "./call/matchCall/cancelOutgoingCall"
 
 import { joinStrangerCallQueue } from "./call/anonymousCall/joinStrangerCallQueue"
 import { leaveStrangerCallQueue } from "./call/anonymousCall/leaveStrangerCallQueue"
 import { exposeIdentity } from "./call/anonymousCall/exposeIdentity"
-import { unlockMessaging } from "./call/anonymousCall/unlockMessaging"
+import { unlockMessaging } from "./call/unlockMessaging"
 
 import { getPermissions } from "./permission"
 
@@ -58,7 +58,7 @@ exports.joinStrangerCallQueue = joinStrangerCallQueue
 exports.leaveStrangerCallQueue = leaveStrangerCallQueue
 exports.exposeIdentity = exposeIdentity
 exports.unlockMessaging = unlockMessaging
-exports.hangUp = hangUp
+exports.hangUpMatchCall = hangUpMatchCall
 
 exports.getPermissions = getPermissions
 
