@@ -2,7 +2,7 @@ import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { v4 as uuidv4 } from "uuid"
 import { MessageDataToSaveIntoFirestore } from "../message/type"
-import { CallData } from "./type"
+import { Call } from "./type"
 
 async function becomeContacts(selfUserId: string, contactId: string) {
 	const createdAt = new Date()
@@ -48,19 +48,28 @@ export const unlockMessaging = functions.https.onCall(async (data, context) => {
 		}
 	}
 	const { uid: selfUserId } = authUser
-	const { contactId } = data
+	const { contactId, callId } = data
 
-	const selfCallData = (
-		await admin
-			.firestore()
-			.collection("users")
-			.doc(selfUserId)
-			.collection("call")
-			.doc("call")
-			.get()
-	).data() as CallData
+	const selfCallRef = admin
+		.firestore()
+		.collection("users")
+		.doc(selfUserId)
+		.collection("calls")
+		.doc(callId)
 
-	if (selfCallData.hasContactUnlockedMessaging) {
+	const otherCallRef = admin
+		.firestore()
+		.collection("users")
+		.doc(contactId)
+		.collection("calls")
+		.doc(callId)
+
+	selfCallRef.update({ selfHasUnlockedMessaging: true })
+	otherCallRef.update({ otherHasUnlockedMessaging: true })
+
+	const selfCallData = (await selfCallRef.get()).data() as Call
+
+	if (selfCallData.otherHasUnlockedMessaging) {
 		becomeContacts(selfUserId, contactId)
 	}
 
@@ -69,8 +78,12 @@ export const unlockMessaging = functions.https.onCall(async (data, context) => {
 		.collection("users")
 		.doc(contactId)
 		.collection("call")
-		.doc("call")
-		.update({ hasContactUnlockedMessaging: true })
+		.doc("event")
+		.set({
+			callId,
+			name: "otherUnlockedMessaging",
+			createdAt: new Date(),
+		})
 
 	return { success: true }
 })
