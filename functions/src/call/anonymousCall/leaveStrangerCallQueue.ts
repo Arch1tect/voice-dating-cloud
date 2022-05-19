@@ -14,14 +14,6 @@ export const leaveStrangerCallQueue = functions.https.onCall(
 		}
 		const { uid: selfUserId } = authUser
 
-		const selfCallRef = admin
-			.firestore()
-			.collection("users")
-			.doc(selfUserId)
-			.collection("call")
-			.doc("call")
-		selfCallRef.set({})
-
 		const callQueueRef = admin
 			.firestore()
 			.collection("anonymousCallQueue")

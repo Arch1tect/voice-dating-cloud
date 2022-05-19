@@ -1,36 +1,33 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { CALL_STATES } from "../state"
+import { v4 as uuidv4 } from "uuid"
 import { getToken } from "../agora"
+import { Call } from "../type"
 
-async function joinCallQueue(selfUser: any, selfFilter: any) {
-	const callRef = admin
-		.firestore()
-		.collection("users")
-		.doc(selfUser.id)
-		.collection("call")
-		.doc("call")
+const MAX_WAIT_TIME = 15 * 1000
+const TIMEOUT_ERROR_CODE = 408
 
-	const now = new Date()
+type CleanUps = {
+	timeoutId?: ReturnType<typeof setTimeout>
+	unsubFromCall?: () => void
+	unsubFromEvent?: () => void
+}
 
-	callRef.set({
-		calledAt: now,
-		mode: "anonymous",
-		state: CALL_STATES.WAITING_FOR_STRANGER,
-	})
-
+async function joinCallQueue(callId: string, selfUser: any, selfFilter: any) {
 	const callQueueRef = admin
 		.firestore()
 		.collection("anonymousCallQueue")
 		.doc(selfUser.id)
 
-	// TODO: client should include user's info and filter when queuing
-	callQueueRef.set({
+	// TBD: to be faster, client should include user's info and filter when queuing?
+	await callQueueRef.set({
+		callId,
 		user: selfUser,
 		filters: selfFilter,
-		calledAt: now,
+		queuedAt: new Date(),
 	})
 }
+
 async function updateCallCount(userId: string) {
 	const callCountRef = admin
 		.firestore()
@@ -59,10 +56,11 @@ async function updateCallCount(userId: string) {
 }
 async function findTargetFromQueue(selfUserData: any, selfFilterData: any) {
 	let targetUser = null
+	let targetCallId = null
 	const contactQueryRes = await admin
 		.firestore()
 		.collection("anonymousCallQueue")
-		.orderBy("calledAt", "desc")
+		.orderBy("queuedAt", "desc")
 		.get()
 	const callQueue: any = []
 	// console.log(messagesQueryRes.docs.length)
@@ -72,20 +70,104 @@ async function findTargetFromQueue(selfUserData: any, selfFilterData: any) {
 
 	for (let index = 0; index < callQueue.length; index++) {
 		// const { user, filters } = callQueue[index]
-		const { user } = callQueue[index]
+		const { user, callId } = callQueue[index]
 
 		// TODO: check each user's filter and info against self user data
 		targetUser = user
-		// remove target from queue
-		const targetQueueRef = admin
-			.firestore()
-			.collection("anonymousCallQueue")
-			.doc(targetUser.id)
-		targetQueueRef.delete()
+		targetCallId = callId
+
 		break
 	}
 
-	return targetUser
+	return { targetUser, targetCallId }
+}
+function checkCallCanceled(
+	selfUserId: string,
+	reject: (reason?: any) => void,
+	cleanUp: () => void
+) {
+	return admin
+		.firestore()
+		.collection("anonymousCallQueue")
+		.doc(selfUserId)
+		.onSnapshot((snapshot) => {
+			if (!snapshot.exists) {
+				cleanUp()
+				reject(411)
+			}
+		})
+}
+
+function checkCallConnected(
+	callId: string,
+	selfUserId: string,
+	resolve: (value: unknown) => void,
+	cleanUp: () => void
+) {
+	return admin
+		.firestore()
+		.collection("users")
+		.doc(selfUserId)
+		.collection("calls")
+		.doc(callId)
+		.onSnapshot((snapshot) => {
+			if (snapshot.exists) {
+				const { callerId, calleeId } = snapshot.data() as Call
+
+				const channelName = `${callerId}-${calleeId}`
+				const token = getToken(channelName, 0)
+				const channelInfo = {
+					channelName,
+					token,
+					selfId: 0,
+				}
+				cleanUp()
+
+				resolve({ channelInfo, contactId: calleeId })
+			}
+		})
+}
+
+function checkWaitTimeout(
+	selfUserId: string,
+	reject: (reason?: any) => void,
+	cleanUp: () => void
+) {
+	return setTimeout(() => {
+		console.log("wait time up")
+		cleanUp()
+
+		const callQueueRef = admin
+			.firestore()
+			.collection("anonymousCallQueue")
+			.doc(selfUserId)
+
+		callQueueRef.delete()
+
+		reject(TIMEOUT_ERROR_CODE)
+	}, MAX_WAIT_TIME)
+}
+
+async function waitForConnection(callId: string, selfUserId: string) {
+	return new Promise((resolve, reject) => {
+		const cleanUps: CleanUps = {}
+		const cleanUp = () => {
+			cleanUps.timeoutId && clearTimeout(cleanUps.timeoutId)
+			cleanUps.unsubFromCall && cleanUps.unsubFromCall()
+			cleanUps.unsubFromEvent && cleanUps.unsubFromEvent()
+		}
+
+		cleanUps.timeoutId = checkWaitTimeout(selfUserId, reject, cleanUp)
+
+		cleanUps.unsubFromCall = checkCallConnected(
+			callId,
+			selfUserId,
+			resolve,
+			cleanUp
+		)
+
+		cleanUps.unsubFromEvent = checkCallCanceled(selfUserId, reject, cleanUp)
+	})
 }
 
 export const joinStrangerCallQueue = functions.https.onCall(
@@ -99,6 +181,7 @@ export const joinStrangerCallQueue = functions.https.onCall(
 				errorCode: 401,
 			}
 		}
+		let res = {}
 		const { uid: selfUserId } = authUser
 
 		const selfUser = (
@@ -116,61 +199,85 @@ export const joinStrangerCallQueue = functions.https.onCall(
 					.get()
 			).data() || {}
 
-		const targetUser = await findTargetFromQueue(selfUser, selfFilter)
+		const { targetUser, targetCallId } = await findTargetFromQueue(
+			selfUser,
+			selfFilter
+		)
 
-		if (targetUser) {
-			const selfCallRef = admin
+		if (targetUser && targetCallId) {
+			const call: Call = {
+				id: targetCallId,
+				callerId: targetUser.id,
+				calleeId: selfUserId,
+				mode: "anonymous",
+				createdAt: new Date(),
+			}
+
+			admin
 				.firestore()
 				.collection("users")
 				.doc(selfUserId)
-				.collection("call")
-				.doc("call")
+				.collection("calls")
+				.doc(targetCallId)
+				.set(call)
 
-			const targetCallRef = admin
+			await admin
 				.firestore()
 				.collection("users")
 				.doc(targetUser.id)
-				.collection("call")
-				.doc("call")
+				.collection("calls")
+				.doc(targetCallId)
+				.set(call)
 
-			const now = new Date()
+			// Note: only remove target from queue after created the call
+			// or waitForConnection will think user has canceled waiting
+			const targetQueueRef = admin
+				.firestore()
+				.collection("anonymousCallQueue")
+				.doc(targetUser.id)
+			targetQueueRef.delete()
 
-			const channelName = `${targetUser.id}-${selfUserId}`
-			const targetCallToken = getToken(channelName, 0)
-			const selfCallToken = getToken(channelName, 1)
+			const channelName = `${call.callerId}-${call.calleeId}`
+			const token = getToken(channelName, 1)
+			const channelInfo = {
+				channelName,
+				token,
+				selfId: 1,
+			}
 
-			targetCallRef.set({
-				contactId: selfUserId,
-				// contact: selfUser, // user decide if they want to expose identity
-				calledAt: now,
-				mode: "anonymous",
-				state: CALL_STATES.CONNECTED,
-				callMetadata: {
-					channelName,
-					selfId: 0,
-					token: targetCallToken,
+			res = {
+				success: true,
+				data: {
+					channelInfo,
+					callId: targetCallId,
+					contactId: targetUser.id,
 				},
-			})
-
-			selfCallRef.set({
-				contactId: targetUser.id,
-				// contact: targetUser,  // user decide if they want to expose identity
-				calledAt: now,
-				mode: "anonymous",
-				state: CALL_STATES.CONNECTED,
-				callMetadata: {
-					channelName,
-					selfId: 1,
-					token: selfCallToken,
-				},
-			})
+			}
 
 			updateCallCount(selfUserId)
 			updateCallCount(targetUser.id)
 		} else {
-			await joinCallQueue(selfUser, selfFilter)
+			const callId = uuidv4()
+			await joinCallQueue(callId, selfUser, selfFilter)
+
+			try {
+				const { channelInfo, contactId } = (await waitForConnection(
+					callId,
+					selfUserId
+				)) as any
+				res = {
+					success: true,
+					data: { channelInfo, callId, contactId },
+				}
+			} catch (error) {
+				console.error(error)
+				res = {
+					success: false,
+					errorCode: error,
+				}
+			}
 		}
 
-		return { success: true }
+		return res
 	}
 )

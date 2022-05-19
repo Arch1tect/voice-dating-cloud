@@ -155,6 +155,7 @@ async function waitForAnswer(
 		const cleanUp = () => {
 			cleanUps.timeoutId && clearTimeout(cleanUps.timeoutId)
 			cleanUps.unsubFromCall && cleanUps.unsubFromCall()
+			cleanUps.unsubFromEvent && cleanUps.unsubFromEvent()
 		}
 
 		cleanUps.timeoutId = checkWaitTimeout(callId, calleeId, reject, cleanUp)

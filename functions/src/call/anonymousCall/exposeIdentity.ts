@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { CallData } from "../type"
+import { Call } from "../type"
 
 // TBD: important, there is race condition when we implement it this way.
 // An alternative would be for client to check for the state that both self
@@ -59,17 +59,28 @@ export const exposeIdentity = functions.https.onCall(async (data, context) => {
 		}
 	}
 	const { uid: selfUserId } = authUser
-	const { contactId } = data
-	const selfCallData = (
-		await admin
-			.firestore()
-			.collection("users")
-			.doc(selfUserId)
-			.collection("call")
-			.doc("call")
-			.get()
-	).data() as CallData
-	if (selfCallData.contact) {
+	const { contactId, callId } = data
+
+	const selfCallRef = admin
+		.firestore()
+		.collection("users")
+		.doc(selfUserId)
+		.collection("calls")
+		.doc(callId)
+
+	const otherCallRef = admin
+		.firestore()
+		.collection("users")
+		.doc(contactId)
+		.collection("calls")
+		.doc(callId)
+
+	selfCallRef.update({ selfHasShownProfile: true })
+	otherCallRef.update({ otherHasShownProfile: true })
+
+	const selfCallData = (await selfCallRef.get()).data() as Call
+
+	if (selfCallData.otherHasShownProfile) {
 		// both has exposed identity, match two users now
 		matchUsers(selfUserId, contactId)
 	}
@@ -77,13 +88,19 @@ export const exposeIdentity = functions.https.onCall(async (data, context) => {
 	const selfUser = (
 		await admin.firestore().collection("users").doc(selfUserId).get()
 	).data()
-	const contactCallRef = admin
+
+	admin
 		.firestore()
 		.collection("users")
 		.doc(contactId)
 		.collection("call")
-		.doc("call")
-	contactCallRef.update({ contact: selfUser })
+		.doc("event")
+		.set({
+			callId,
+			name: "otherHasShownProfile",
+			createdAt: new Date(),
+			data: selfUser,
+		})
 
 	return { success: true }
 })
