@@ -18,7 +18,7 @@ import { impersonate } from "./admin/impersonate"
 import { callMe } from "./call/matchCall/callMe"
 import { makeOutgoingCall } from "./call/matchCall/makeOutgoingCall"
 import { answerCall } from "./call/matchCall/answerCall"
-import { hangUpMatchCall } from "./call/matchCall/hangUpMatchCall"
+import { hangUp } from "./call/hangUp"
 import { declineIncomingCall } from "./call/matchCall/declineIncomingCall"
 import { cancelOutgoingCall } from "./call/matchCall/cancelOutgoingCall"
 
@@ -58,7 +58,7 @@ exports.joinStrangerCallQueue = joinStrangerCallQueue
 exports.leaveStrangerCallQueue = leaveStrangerCallQueue
 exports.exposeIdentity = exposeIdentity
 exports.unlockMessaging = unlockMessaging
-exports.hangUpMatchCall = hangUpMatchCall
+exports.hangUpMatchCall = hangUp
 
 exports.getPermissions = getPermissions
 

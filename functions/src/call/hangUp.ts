@@ -1,9 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-// import { CALL_STATES } from "./state"
-// import { sleep } from "../utils"
 
-export const hangUpMatchCall = functions.https.onCall(async (data, context) => {
+export const hangUp = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
 
 	if (!authUser) {
