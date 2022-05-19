@@ -58,7 +58,7 @@ exports.joinStrangerCallQueue = joinStrangerCallQueue
 exports.leaveStrangerCallQueue = leaveStrangerCallQueue
 exports.exposeIdentity = exposeIdentity
 exports.unlockMessaging = unlockMessaging
-exports.hangUpMatchCall = hangUp
+exports.hangUp = hangUp
 
 exports.getPermissions = getPermissions
 
