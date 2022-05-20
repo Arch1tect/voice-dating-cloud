@@ -1,14 +1,22 @@
 import * as admin from "firebase-admin"
 import { WhereFilterOp } from "@google-cloud/firestore"
-import { convertAgeToBirthday } from "../../utils"
+import { convertAgeToBirthday, getDistance } from "../../utils"
+import { User } from "../../user/type"
+
 type Filters = {
 	gender?: string
 	minAge?: number
 	maxAge?: number
 	minHeight?: number
 	maxHeight?: number
-
-	languages?: []
+	ethnicities?: string[]
+	religions?: string[]
+	languages?: string[]
+	education?: number
+	hasKids?: string // yes or no
+	familyPlans?: string
+	relationshipGoals?: string
+	distance?: number // meters
 }
 
 export const getFilters = async (selfUserId: string) => {
@@ -64,4 +72,121 @@ export const getQueryConstraints = async (filters: Filters) => {
 	}
 
 	return constraints
+}
+
+export const filterUsers = (
+	selfUser: User,
+	users: User[],
+	filters: Filters
+) => {
+	const {
+		gender,
+		minAge,
+		maxAge,
+		minHeight,
+		maxHeight,
+		languages,
+		ethnicities,
+		religions,
+		education,
+		hasKids,
+		familyPlans,
+		relationshipGoals,
+		distance,
+	} = filters
+
+	return users.filter((u) => {
+		if (gender && gender !== u.gender) {
+			console.warn("gender was not filtered properly")
+			return false
+		}
+
+		if (minAge && u.birthday > convertAgeToBirthday(minAge)) {
+			console.warn("minAge was not filtered properly")
+			return false
+		}
+
+		if (maxAge && u.birthday < convertAgeToBirthday(maxAge)) {
+			console.warn("maxAge was not filtered properly")
+			return false
+		}
+
+		if (languages && languages.length > 0) {
+			const intersection = languages.filter((l) =>
+				u.languages.includes(l)
+			)
+			if (intersection.length === 0) {
+				console.warn("languages was not filtered properly")
+				return false
+			}
+		}
+
+		if (languages && languages.length > 0) {
+			const intersection = languages.filter((l) =>
+				u.languages.includes(l)
+			)
+			if (intersection.length === 0) {
+				console.warn("languages was not filtered properly")
+				return false
+			}
+		}
+		if (minHeight && u.height && u.height < minHeight) {
+			return false
+		}
+		if (maxHeight && u.height && u.height > maxHeight) {
+			return false
+		}
+		if (
+			ethnicities &&
+			ethnicities.length > 0 &&
+			u.ethnicity &&
+			!ethnicities.includes(u.ethnicity)
+		) {
+			return false
+		}
+
+		if (
+			religions &&
+			religions.length > 0 &&
+			u.religion &&
+			!religions.includes(u.religion)
+		) {
+			return false
+		}
+
+		if (education && u.education && u.education < education) {
+			return false
+		}
+
+		if (hasKids && u.hasKids && hasKids !== u.hasKids) {
+			return false
+		}
+
+		if (familyPlans && u.familyPlans && u.familyPlans !== familyPlans) {
+			return false
+		}
+
+		if (
+			relationshipGoals &&
+			u.relationshipGoals &&
+			relationshipGoals !== u.relationshipGoals
+		) {
+			return false
+		}
+
+		if (distance && u.lat && u.lng && selfUser.lat && selfUser.lng) {
+			const dist = getDistance(
+				u.lat,
+				u.lng,
+				selfUser.lat,
+				selfUser.lng,
+				"M" // TODO: change this to 'K', always use metrics in backend
+			)
+			if (dist > distance) {
+				return false
+			}
+		}
+
+		return true
+	})
 }

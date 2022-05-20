@@ -1,12 +1,8 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import * as sharp from "sharp"
+import { UserPhoto } from "./type"
 // import * as fs from "fs"
-type Image = {
-	small: string
-	medium: string
-	large: string
-}
 
 type FileSize = {
 	name: "small" | "medium" | "large"
@@ -42,7 +38,7 @@ export const uploadPhoto = functions.https.onCall(async (data, context) => {
 		{ name: "large", value: 1080 },
 	]
 	const timestamp = new Date().getTime()
-	const res: Image = { small: "", medium: "", large: "" }
+	const res: UserPhoto = { small: "", medium: "", large: "" }
 	for (let index = 0; index < fileSizes.length; index++) {
 		const { name, value } = fileSizes[index]
 		const filePath = `users/${selfUserId}/profile/${timestamp}-${value}.jpg`

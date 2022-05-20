@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
+import { User } from "./type"
 
 // Technically this is actually onboarding rather than signup, signup is
 // already handled by the firebase auth system.
@@ -17,7 +18,8 @@ export const signUp = functions.https.onCall(async (data, context) => {
 
 	const { name, birthday, location, job, photos, gender, language } = data
 	const languages = [language]
-	const userData = {
+	const now = new Date()
+	const userData: User = {
 		id: selfUserId,
 		name,
 		gender,
@@ -29,7 +31,8 @@ export const signUp = functions.https.onCall(async (data, context) => {
 		state: location.state,
 		lat: location.lat,
 		lng: location.lng,
-		createdAt: new Date(),
+		createdAt: now,
+		lastLoginTime: now,
 	}
 
 	await admin.firestore().collection("users").doc(selfUserId).set(userData)
