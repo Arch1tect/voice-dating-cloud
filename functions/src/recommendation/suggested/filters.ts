@@ -16,7 +16,7 @@ type Filters = {
 	hasKids?: string // yes or no
 	familyPlans?: string
 	relationshipGoals?: string
-	distance?: number // meters
+	distance?: number // distance from filter is always in Kilometers
 }
 
 export const getFilters = async (selfUserId: string) => {
@@ -175,12 +175,13 @@ export const filterUsers = (
 		}
 
 		if (distance && u.lat && u.lng && selfUser.lat && selfUser.lng) {
+			// distance from filter is always in Kilometers
 			const dist = getDistance(
 				u.lat,
 				u.lng,
 				selfUser.lat,
 				selfUser.lng,
-				"M" // TODO: change this to 'K', always use metrics in backend
+				"K"
 			)
 			if (dist > distance) {
 				return false
