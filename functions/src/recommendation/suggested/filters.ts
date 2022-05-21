@@ -2,22 +2,7 @@ import * as admin from "firebase-admin"
 import { WhereFilterOp } from "@google-cloud/firestore"
 import { convertAgeToBirthday, getDistance } from "../../utils"
 import { User } from "../../user/type"
-
-export type Filters = {
-	gender?: string
-	minAge?: number
-	maxAge?: number
-	minHeight?: number
-	maxHeight?: number
-	ethnicities?: string[]
-	religions?: string[]
-	languages?: string[]
-	education?: number
-	hasKids?: string // yes or no
-	familyPlans?: string
-	relationshipGoals?: string
-	distance?: number // distance from filter is always in Kilometers
-}
+import { Filters } from "../../settings/updateFilters"
 
 export const getFilters = async (selfUserId: string) => {
 	const selfUserFiltersDocRef = admin

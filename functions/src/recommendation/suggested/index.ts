@@ -1,9 +1,10 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 
-import { Filters, filterUsers, getQueryConstraints } from "./filters"
+import { filterUsers, getQueryConstraints } from "./filters"
 import { User } from "../../user/type"
 import { convertAgeToBirthday } from "../../utils"
+import { Filters } from "../../settings/updateFilters"
 
 /*
 Client must always send together the filters, this is because client may update
