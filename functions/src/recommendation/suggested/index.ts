@@ -17,15 +17,14 @@ function sortUsers(selfUser: User, filters: Filters, users: User[]) {
 		filters.minAge && filters.maxAge
 			? convertAgeToBirthday((filters.minAge + filters.maxAge) / 2)
 			: selfUser.birthday
-	users
-		.sort((u1, u2) => {
-			const ageDiff1 = Math.abs(u1.birthday - preferredBirthday)
-			const ageDiff2 = Math.abs(u2.birthday - preferredBirthday)
-			return ageDiff1 - ageDiff2
-		})
-		.sort((u1, u2) => {
-			return (u2.likeCount || 0) - (u1.likeCount || 0)
-		})
+	users.sort((u1, u2) => {
+		const ageDiff1 = Math.abs(u1.birthday - preferredBirthday)
+		const ageDiff2 = Math.abs(u2.birthday - preferredBirthday)
+		return ageDiff1 - ageDiff2
+	})
+	// .sort((u1, u2) => {
+	// 	return (u2.likeCount || 0) - (u1.likeCount || 0)
+	// }) // sorting by likeCount would be too similar to the hot list
 }
 
 export const getSuggestedUsers = functions.https.onCall(
