@@ -3,7 +3,7 @@ import { WhereFilterOp } from "@google-cloud/firestore"
 import { convertAgeToBirthday, getDistance } from "../../utils"
 import { User } from "../../user/type"
 
-type Filters = {
+export type Filters = {
 	gender?: string
 	minAge?: number
 	maxAge?: number
@@ -37,35 +37,35 @@ function where(a: string, b: string, c: any): [string, WhereFilterOp, any] {
 }
 
 export const getQueryConstraints = async (filters: Filters) => {
-	const { gender, minAge, maxAge, minHeight, maxHeight, languages } = filters
+	const { gender, languages } = filters
 
 	const constraints = []
 
 	if (gender) {
 		constraints.push(where("gender", "==", gender))
 	}
-	let usedRangeFilter = false
+	// let usedRangeFilter = false
 
-	if (minAge) {
-		usedRangeFilter = true
-		constraints.push(where("birthday", "<=", convertAgeToBirthday(minAge)))
-	}
-	if (maxAge) {
-		usedRangeFilter = true
-		constraints.push(where("birthday", ">=", convertAgeToBirthday(maxAge)))
-	}
+	// if (minAge) {
+	// 	usedRangeFilter = true
+	// 	constraints.push(where("birthday", "<=", convertAgeToBirthday(minAge)))
+	// }
+	// if (maxAge) {
+	// 	usedRangeFilter = true
+	// 	constraints.push(where("birthday", ">=", convertAgeToBirthday(maxAge)))
+	// }
 
 	// firestore only allow range filter on one field
-	if (!usedRangeFilter) {
-		if (minHeight) {
-			constraints.push(where("height", ">=", minHeight))
-			usedRangeFilter = true
-		}
-		if (maxHeight) {
-			constraints.push(where("height", "<=", maxHeight))
-			usedRangeFilter = true
-		}
-	}
+	// if (!usedRangeFilter) {
+	// 	if (minHeight) {
+	// 		constraints.push(where("height", ">=", minHeight))
+	// 		usedRangeFilter = true
+	// 	}
+	// 	if (maxHeight) {
+	// 		constraints.push(where("height", "<=", maxHeight))
+	// 		usedRangeFilter = true
+	// 	}
+	// }
 
 	if (languages && languages.length > 0) {
 		constraints.push(where("languages", "array-contains-any", languages))
@@ -102,12 +102,12 @@ export const filterUsers = (
 		}
 
 		if (minAge && u.birthday > convertAgeToBirthday(minAge)) {
-			console.warn("minAge was not filtered properly")
+			// console.warn("minAge was not filtered properly")
 			return false
 		}
 
 		if (maxAge && u.birthday < convertAgeToBirthday(maxAge)) {
-			console.warn("maxAge was not filtered properly")
+			// console.warn("maxAge was not filtered properly")
 			return false
 		}
 
@@ -121,15 +121,6 @@ export const filterUsers = (
 			}
 		}
 
-		if (languages && languages.length > 0) {
-			const intersection = languages.filter((l) =>
-				u.languages.includes(l)
-			)
-			if (intersection.length === 0) {
-				console.warn("languages was not filtered properly")
-				return false
-			}
-		}
 		if (minHeight && u.height && u.height < minHeight) {
 			return false
 		}

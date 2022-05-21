@@ -30,4 +30,6 @@ export type User = {
 	hasKids?: string
 	relationshipGoals?: string
 	smokingFrequency?: string
+
+	likeCount?: number
 }
