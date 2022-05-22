@@ -13,10 +13,15 @@ from firestore.
 */
 
 function sortUsers(selfUser: User, filters: Filters, users: User[]) {
-	const preferredBirthday =
-		filters.minAge && filters.maxAge
-			? convertAgeToBirthday((filters.minAge + filters.maxAge) / 2)
-			: selfUser.birthday
+	const { minAge, maxAge } = filters
+	let preferredBirthday = selfUser.birthday
+	if (minAge || maxAge) {
+		// in case user set only one of min and max ages, still want to use the range
+		const min = minAge || 18
+		const max = maxAge || 50
+		preferredBirthday = convertAgeToBirthday((min + max) / 2)
+	}
+
 	users.sort((u1, u2) => {
 		const ageDiff1 = Math.abs(u1.birthday - preferredBirthday)
 		const ageDiff2 = Math.abs(u2.birthday - preferredBirthday)

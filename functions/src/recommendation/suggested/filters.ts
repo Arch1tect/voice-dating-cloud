@@ -87,12 +87,12 @@ export const filterUsers = (
 		}
 
 		if (minAge && u.birthday > convertAgeToBirthday(minAge)) {
-			// console.warn("minAge was not filtered properly")
+			// console.warn("min age out")
 			return false
 		}
 
 		if (maxAge && u.birthday < convertAgeToBirthday(maxAge)) {
-			// console.warn("maxAge was not filtered properly")
+			// console.warn("maxAge out")
 			return false
 		}
 
@@ -101,15 +101,19 @@ export const filterUsers = (
 				u.languages.includes(l)
 			)
 			if (intersection.length === 0) {
-				console.warn("languages was not filtered properly")
+				// console.warn("languages out")
 				return false
 			}
 		}
 
 		if (minHeight && u.height && u.height < minHeight) {
+			// console.warn("minHeight out")
+
 			return false
 		}
 		if (maxHeight && u.height && u.height > maxHeight) {
+			// console.warn("maxHeight out")
+
 			return false
 		}
 		if (
@@ -118,6 +122,8 @@ export const filterUsers = (
 			u.ethnicity &&
 			!ethnicities.includes(u.ethnicity)
 		) {
+			// console.warn("ethnicity out")
+
 			return false
 		}
 
@@ -127,18 +133,25 @@ export const filterUsers = (
 			u.religion &&
 			!religions.includes(u.religion)
 		) {
+			// console.warn("religion out")
 			return false
 		}
 
 		if (education && u.education && u.education < education) {
+			// console.warn("education out")
+
 			return false
 		}
 
 		if (hasKids && u.hasKids && hasKids !== u.hasKids) {
+			// console.warn("hasKids out")
+
 			return false
 		}
 
 		if (familyPlans && u.familyPlans && u.familyPlans !== familyPlans) {
+			// console.warn("familyPlans out")
+
 			return false
 		}
 
@@ -147,6 +160,7 @@ export const filterUsers = (
 			u.relationshipGoals &&
 			relationshipGoals !== u.relationshipGoals
 		) {
+			// console.warn("relationshipGoals out")
 			return false
 		}
 
@@ -160,6 +174,8 @@ export const filterUsers = (
 				"K"
 			)
 			if (dist > distance) {
+				// console.warn("distance out")
+
 				return false
 			}
 		}
