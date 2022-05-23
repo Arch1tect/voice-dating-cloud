@@ -3,6 +3,8 @@ import * as admin from "firebase-admin"
 import { v4 as uuidv4 } from "uuid"
 import { getToken } from "../agora"
 import { Call } from "../type"
+import { User } from "../../user/type"
+import { Filters } from "../../settings/updateFilters"
 
 const MAX_WAIT_TIME = 15 * 1000
 const TIMEOUT_ERROR_CODE = 408
@@ -13,6 +15,13 @@ type CleanUps = {
 	unsubFromEvent?: () => void
 }
 
+type QueuedCall = {
+	callId: string
+	user: User
+	filters: Filters
+	queuedAt: Date
+}
+
 async function joinCallQueue(callId: string, selfUser: any, selfFilter: any) {
 	const callQueueRef = admin
 		.firestore()
@@ -20,12 +29,13 @@ async function joinCallQueue(callId: string, selfUser: any, selfFilter: any) {
 		.doc(selfUser.id)
 
 	// TBD: to be faster, client should include user's info and filter when queuing?
-	await callQueueRef.set({
+	const queuedCall: QueuedCall = {
 		callId,
 		user: selfUser,
 		filters: selfFilter,
 		queuedAt: new Date(),
-	})
+	}
+	await callQueueRef.set(queuedCall)
 }
 
 async function updateCallCount(userId: string) {
@@ -54,7 +64,63 @@ async function updateCallCount(userId: string) {
 		count: todaysCount + 1,
 	})
 }
-async function findTargetFromQueue(selfUserData: any, selfFilterData: any) {
+
+function isMatch(
+	targetUser: User,
+	targetUserFilters: Filters,
+	selfUser: User,
+	selfUserFilters: Filters
+) {
+	if (selfUser.id === targetUser.id) {
+		console.warn("cannot anonymous chat with self!")
+		return false
+	}
+
+	if (
+		selfUserFilters.gender &&
+		selfUserFilters.gender !== targetUser.gender
+	) {
+		console.log("target gender out ")
+		return false
+	}
+
+	if (
+		targetUserFilters.gender &&
+		targetUserFilters.gender !== selfUser.gender
+	) {
+		console.log("self gender out ")
+
+		return false
+	}
+
+	if (selfUserFilters.languages?.length) {
+		const intersection = selfUserFilters.languages.filter((l) =>
+			targetUser.languages.includes(l)
+		)
+		if (intersection.length === 0) {
+			console.log("target languages out ")
+
+			return false
+		}
+	}
+	if (targetUserFilters.languages?.length) {
+		const intersection = targetUserFilters.languages.filter((l) =>
+			selfUser.languages.includes(l)
+		)
+		if (intersection.length === 0) {
+			console.log("self languages out ")
+
+			return false
+		}
+	}
+
+	return true
+}
+
+async function findTargetFromQueue(
+	selfUserData: User,
+	selfFilterData: Filters
+) {
 	let targetUser = null
 	let targetCallId = null
 	const contactQueryRes = await admin
@@ -62,21 +128,23 @@ async function findTargetFromQueue(selfUserData: any, selfFilterData: any) {
 		.collection("anonymousCallQueue")
 		.orderBy("queuedAt", "desc")
 		.get()
-	const callQueue: any = []
+	const callQueue: QueuedCall[] = []
 	// console.log(messagesQueryRes.docs.length)
 	contactQueryRes.forEach((docSnapshot) => {
-		callQueue.push(docSnapshot.data())
+		callQueue.push(docSnapshot.data() as QueuedCall)
 	})
 
+	// TODO: besides filtering, also sort by soft criteriors like distance, likeCount etc.
 	for (let index = 0; index < callQueue.length; index++) {
 		// const { user, filters } = callQueue[index]
-		const { user, callId } = callQueue[index]
+		const { user, callId, filters } = callQueue[index]
 
-		// TODO: check each user's filter and info against self user data
-		targetUser = user
-		targetCallId = callId
+		if (isMatch(user, filters, selfUserData, selfFilterData)) {
+			targetUser = user
+			targetCallId = callId
 
-		break
+			break
+		}
 	}
 
 	return { targetUser, targetCallId }
@@ -186,18 +254,17 @@ export const joinStrangerCallQueue = functions.https.onCall(
 
 		const selfUser = (
 			await admin.firestore().collection("users").doc(selfUserId).get()
-		).data()
+		).data() as User
 
-		const selfFilter =
-			(
-				await admin
-					.firestore()
-					.collection("users")
-					.doc(selfUserId)
-					.collection("settings")
-					.doc("filters")
-					.get()
-			).data() || {}
+		const selfFilter = (
+			await admin
+				.firestore()
+				.collection("users")
+				.doc(selfUserId)
+				.collection("settings")
+				.doc("filters")
+				.get()
+		).data() as Filters
 
 		const { targetUser, targetCallId } = await findTargetFromQueue(
 			selfUser,
