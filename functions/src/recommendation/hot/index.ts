@@ -43,12 +43,14 @@ export const getHotUsers = functions.https.onCall(async (data, context) => {
 	let query = admin
 		.firestore()
 		.collection("users")
-		.where("state", "==", selfUser.state)
+		.where("status", "==", "good")
+	// TODO: enable state filter when there are enough users
+	// .where("state", "==", selfUser.state)
 
 	queryConstraints.forEach((q) => {
 		query = query.where(...q)
 	})
-	query = query.limit(100)
+	query = query.limit(50)
 	query = query.orderBy("lastLoginTime", "desc")
 
 	const queryResult = await query.get()

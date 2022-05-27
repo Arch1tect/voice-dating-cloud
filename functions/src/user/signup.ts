@@ -33,6 +33,7 @@ export const signUp = functions.https.onCall(async (data, context) => {
 		lng: location.lng,
 		createdAt: now,
 		lastLoginTime: now,
+		status: "good",
 	}
 
 	await admin.firestore().collection("users").doc(selfUserId).set(userData)

@@ -18,6 +18,7 @@ export type User = {
 	photos: UserPhoto[]
 	createdAt: Date
 	lastLoginTime: Date
+	status: string
 
 	about?: any
 	height?: number

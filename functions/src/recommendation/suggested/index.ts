@@ -55,7 +55,9 @@ export const getSuggestedUsers = functions.https.onCall(
 		let query = admin
 			.firestore()
 			.collection("users")
-			.where("state", "==", selfUser.state)
+			.where("status", "==", "good")
+		// TODO: enable state filter when there are enough users
+		// .where("state", "==", selfUser.state)
 
 		queryConstraints.forEach((q) => {
 			query = query.where(...q)
