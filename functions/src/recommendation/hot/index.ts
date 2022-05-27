@@ -10,6 +10,7 @@ function sortUsers(selfUser: User, filters: Filters, users: User[]) {
 		filters.minAge && filters.maxAge
 			? convertAgeToBirthday((filters.minAge + filters.maxAge) / 2)
 			: selfUser.birthday
+	// console.log(preferredBirthday)
 	users
 		.sort((u1, u2) => {
 			const ageDiff1 = Math.abs(u1.birthday - preferredBirthday)
@@ -50,7 +51,7 @@ export const getHotUsers = functions.https.onCall(async (data, context) => {
 	queryConstraints.forEach((q) => {
 		query = query.where(...q)
 	})
-	query = query.limit(50)
+	query = query.limit(1000)
 	query = query.orderBy("lastLoginTime", "desc")
 
 	const queryResult = await query.get()
