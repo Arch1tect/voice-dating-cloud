@@ -62,6 +62,10 @@ export const getSuggestedUsers = functions.https.onCall(
 		queryConstraints.forEach((q) => {
 			query = query.where(...q)
 		})
+
+		// This query number can't be small or
+		// We need to make subsequent queries based on
+		// why results were filtered out
 		query = query.limit(1000)
 		query = query.orderBy("lastLoginTime", "desc")
 
