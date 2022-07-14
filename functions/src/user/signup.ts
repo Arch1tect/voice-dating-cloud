@@ -52,5 +52,7 @@ export const signUp = functions.https.onCall(async (data, context) => {
 		.doc("filters")
 		.set({ gender: filterGender, languages, maxAge, minAge })
 
+	// TODO: if language is Chinese, set unit to metrics
+
 	return { success: true }
 })
