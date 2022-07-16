@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin"
 import { like } from "./user/like"
 import { editInfo } from "./user/editInfo"
+import { pause } from "./user/pause"
 import { checkIn } from "./user/checkIn"
 import { reportUser } from "./user/report"
 import { uploadPhoto } from "./user/uploadPhoto"
@@ -38,6 +39,7 @@ exports.signUp = signUp
 exports.like = like
 exports.editInfo = editInfo
 exports.checkIn = checkIn
+exports.pause = pause
 exports.uploadPhoto = uploadPhoto
 exports.reportUser = reportUser
 
