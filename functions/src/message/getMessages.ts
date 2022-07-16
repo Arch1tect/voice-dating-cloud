@@ -100,7 +100,10 @@ export const getMessages = functions.https.onCall(async (data, context) => {
 
 	const contacts: any = []
 	contactsQueryRes.forEach((docSnapshot) => {
-		contacts.push(docSnapshot.data())
+		const contact = docSnapshot.data()
+		if (!contact.isDeleted) {
+			contacts.push(contact)
+		}
 	})
 
 	const conversationDict: ConversationDict = {}

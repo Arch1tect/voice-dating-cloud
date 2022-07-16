@@ -32,6 +32,7 @@ import { getPermissions } from "./permission"
 
 import { updateFilters } from "./settings/updateFilters"
 import { updatePreferences } from "./settings/updatePreferences"
+import { deleteAccount } from "./user/delete"
 
 admin.initializeApp()
 
@@ -42,6 +43,7 @@ exports.checkIn = checkIn
 exports.pause = pause
 exports.uploadPhoto = uploadPhoto
 exports.reportUser = reportUser
+exports.deleteAccount = deleteAccount
 
 exports.getSuggestedUsers = getSuggestedUsers
 exports.getHotUsers = getHotUsers
