@@ -17,5 +17,35 @@ export const checkIn = functions.https.onCall((data, context) => {
 
 	selfUserRef.update({ lastLoginTime: new Date() })
 
+	// update device
+	const {
+		version,
+		deviceId,
+		notificationPermissionStatus,
+		pushNotificationToken,
+		deviceInfo,
+	} = data
+
+	console.log("app version", version)
+
+	if (deviceId) {
+		admin
+			.firestore()
+			.collection("users")
+			.doc(selfUserId)
+			.collection("devices")
+			.doc(deviceId)
+			.set(
+				{
+					deviceInfo,
+					deviceId,
+					notificationPermissionStatus,
+					pushNotificationToken,
+					lastLoginTime: new Date(),
+				},
+				{ merge: true }
+			)
+	}
+
 	return { success: true }
 })
