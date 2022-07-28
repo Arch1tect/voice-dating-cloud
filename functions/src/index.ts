@@ -35,6 +35,7 @@ import { updatePreferences } from "./settings/updatePreferences"
 import { deleteAccount } from "./user/delete"
 import { configureNotifications } from "./device/configureNotifications"
 import { permissionUpdate } from "./device/permissionUpdate"
+import { logout } from "./device/logout"
 
 admin.initializeApp()
 
@@ -49,6 +50,7 @@ exports.deleteAccount = deleteAccount
 
 exports.configureNotifications = configureNotifications
 exports.permissionUpdate = permissionUpdate
+exports.logout = logout
 
 exports.getSuggestedUsers = getSuggestedUsers
 exports.getHotUsers = getHotUsers
