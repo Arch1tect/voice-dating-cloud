@@ -30,7 +30,7 @@ async function updateLikeMetadata(userId: string) {
 	})
 }
 
-export const like = functions.https.onCall((data, context) => {
+export const like = functions.https.onCall(async (data, context) => {
 	const authUser = context.auth
 
 	if (!authUser) {
@@ -73,16 +73,31 @@ export const like = functions.https.onCall((data, context) => {
 		likeCount: admin.firestore.FieldValue.increment(like ? 1 : -1),
 	})
 
-	// TODO: check today's like quota and update it
 	if (like) {
-		const notificationData: ExpoPushMessage = {
-			to: "ExponentPushToken[PJ3lLiNmbxyGhFIcZmywSU]",
-			// data: {},
-			title: "Someone just liked you!",
-			// body: data.text,
-			sound: "default",
-		}
-		sendPushNotifications([notificationData])
+		const devicesQueryRes = await targetUserRef.collection("devices").get()
+
+		devicesQueryRes.forEach((docSnapshot) => {
+			const device = docSnapshot.data()
+
+			if (
+				device.pushNotificationToken &&
+				device.notificationPermissionStatus === "granted" &&
+				// setting if not set then default to true
+				!(
+					device.notificationSettings &&
+					!device.notificationSettings.like
+				)
+			) {
+				const notificationData: ExpoPushMessage = {
+					to: device.pushNotificationToken,
+					// data: {},
+					title: "Someone just liked you!",
+					// body: data.text,
+					sound: "default",
+				}
+				sendPushNotifications([notificationData])
+			}
+		})
 	}
 
 	return { success: true }

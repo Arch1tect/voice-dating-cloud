@@ -106,17 +106,38 @@ export const sendMessage = functions.https.onCall(
 		senderMessageRef.set(finalData)
 		receiverMessageRef.set(finalData)
 
-		const notificationData: ExpoPushMessage = {
-			to: "ExponentPushToken[PJ3lLiNmbxyGhFIcZmywSU]",
-			data: finalData,
-			title: senderName,
-			// subtitle: "sub title",
-			// TODO: handle image message
-			// TBD: need to slice?
-			body: imageDataUrl ? "[image]" : text,
-			sound: "default",
-		}
-		sendPushNotifications([notificationData])
+		const devicesQueryRes = await admin
+			.firestore()
+			.collection("users")
+			.doc(receiverId)
+			.collection("devices")
+			.get()
+
+		devicesQueryRes.forEach((docSnapshot) => {
+			const device = docSnapshot.data()
+
+			if (
+				device.pushNotificationToken &&
+				device.notificationPermissionStatus === "granted" &&
+				// setting if not set then default to true
+				!(
+					device.notificationSettings &&
+					!device.notificationSettings.message
+				)
+			) {
+				const notificationData: ExpoPushMessage = {
+					to: device.pushNotificationToken,
+					data: finalData,
+					title: senderName,
+					// subtitle: "sub title",
+					// TODO: handle image message
+					// TBD: need to slice?
+					body: imageDataUrl ? "[image]" : text,
+					sound: "default",
+				}
+				sendPushNotifications([notificationData])
+			}
+		})
 
 		return { success: true }
 	}
